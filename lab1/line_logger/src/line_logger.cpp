@@ -16,3 +16,12 @@ std::string LineLogger::generateReport() const
     }
     return report.str();
 }
+
+int LineLogger::getVariableCount(std::string_view variable)
+{
+    const auto it = variables_.find(variable.data());
+    if (it == variables_.end()) {
+        return 0;
+    }
+    return it->second;
+}

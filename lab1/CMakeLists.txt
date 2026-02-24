@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_TESTING "Build tests" ON)
 
+add_subdirectory(interfaces)
 add_subdirectory(line_logger)
+add_subdirectory(line_checker/regex_impl)
 
 add_executable(lab1 main.cpp)
 

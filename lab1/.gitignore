@@ -5,3 +5,4 @@ cmake-build-debug
 *.so
 *.out
 lab1
+.idea
