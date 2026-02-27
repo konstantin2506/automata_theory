@@ -1,4 +1,4 @@
-#include "../include/line_logger.h"
+#include "line_logger.h"
 #include <sstream>
 using namespace LineChecker;
 

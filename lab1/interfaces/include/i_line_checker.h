@@ -1,8 +1,6 @@
 #pragma once
 
-#include <iosfwd>
-#include "line_logger.h"
-
+#include <string_view>
 namespace LineChecker
 {
 
@@ -10,6 +8,6 @@ namespace LineChecker
     public:
         virtual ~ILineChecker() = default;
 
-        virtual bool checkLine(std::istream& input, ILineLogger& logger) = 0;
+        virtual bool checkLine(const std::string& input, ILineLogger &logger) = 0;
     };
 }

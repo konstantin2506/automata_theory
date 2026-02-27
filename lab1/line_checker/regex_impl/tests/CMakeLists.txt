@@ -12,7 +12,8 @@ add_executable(line_checker_tests
 )
 
 target_link_libraries(line_checker_tests PRIVATE
-        line_checker
+        regex_line_checker
+        line_logger
         Catch2::Catch2WithMain
 )
 

@@ -10,8 +10,9 @@ add_subdirectory(interfaces)
 add_subdirectory(line_logger)
 add_subdirectory(line_checker/regex_impl)
 
-add_executable(lab1 main.cpp)
 
+add_executable(lab1 main.cpp)
+target_link_libraries(lab1 PUBLIC regex_line_checker line_logger)
 if(BUILD_TESTING)
     enable_testing()
 endif()

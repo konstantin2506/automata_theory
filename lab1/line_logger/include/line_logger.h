@@ -2,11 +2,11 @@
 #include <string>
 #include <unordered_map>
 
-#include "../../interfaces/i_line_logger.h"
+#include "i_line_logger.h"
 
 namespace LineChecker
 {
-    class LineLogger final : ILineLogger{
+    class LineLogger final : public ILineLogger{
         std::unordered_map<std::string, int> variables_;
 
     public:
@@ -15,3 +15,4 @@ namespace LineChecker
         [[nodiscard]] int getVariableCount(std::string_view variable) override;
     };
 }
+
