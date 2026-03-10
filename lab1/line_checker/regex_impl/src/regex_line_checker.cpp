@@ -8,7 +8,7 @@ using namespace LineChecker;
 
 bool RegexLineChecker::checkLine(const std::string& input, ILineLogger &logger)
 {
-    static const std::regex pattern(R"(^(\d+)\s+([a-zA-Z][a-zA-Z0-9]{0,15})\s*=\s*(\-\d+|\d+|[a-zA-Z][a-zA-Z0-9]{0,15})\s*(([+\-*/]\s+(\-\d+|\d+|[a-zA-Z][a-zA-Z0-9]{0,15}))?)\s*$)",
+    static const std::regex pattern(R"(^(\d+)\s+([a-zA-Z][a-zA-Z0-9]{0,15})\s*=\s*(\-\d+|\d+|[a-zA-Z][a-zA-Z0-9]{0,15})\s*([+\-*/]\s*(\-\d+|\d+|[a-zA-Z][a-zA-Z0-9]{0,15}))?\s*$)",
     std::regex::icase);
 
     auto begin = std::sregex_iterator(input.begin(), input.end(), pattern);

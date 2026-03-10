@@ -1,13 +1,15 @@
 #include <fstream>
 #include <iostream>
-#include "regex_line_checker.h"
+
 #include "line_logger.h"
+#include "SmcLineChecker.h"
 
 
 int main() {
 
     LineChecker::LineLogger logger;
-    LineChecker::RegexLineChecker checker;
+    LineChecker::SmcLineChecker checker;
+    int c = 0;
     auto handle = [&](std::istream &file)
     {
         std::string line;
@@ -15,7 +17,9 @@ int main() {
             if (line == "q") {
                 return;
             }
-            checker.checkLine(line, logger);
+            ++c;
+            auto res = checker.checkLine(line, logger);
+            std::cout << c << ": "<< res << std::endl;
         }
     };
 

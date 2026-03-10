@@ -4,11 +4,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "line_logger.h"
-#include "regex_line_checker.h"
+#include "SmcLineChecker.h"
 
 using namespace LineChecker;
 
-TEST_CASE("Regex")
+TEST_CASE("SMC")
 {
     SECTION("Basic test")
     {
@@ -24,7 +24,7 @@ TEST_CASE("Regex")
                       "10 simple = test\n");
 
         LineLogger logger;
-        RegexLineChecker checker;
+        SmcLineChecker checker;
 
         std::string line;
         while (std::getline(input, line)) {
@@ -52,7 +52,7 @@ TEST_CASE("Regex")
 
             [[nodiscard]] std::string generateReport() const override {return "";};
         };
-        RegexLineChecker checker;
+        SmcLineChecker checker;
         MockLogger logger;
 
         CHECK(checker.checkLine("", logger) == false);

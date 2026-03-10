@@ -7,14 +7,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(regex_checker_tests
+add_executable(smc_checker_tests
         test_line_checker.cpp
 )
 
-target_link_libraries(regex_checker_tests PRIVATE
-        regex_line_checker
+target_link_libraries(smc_checker_tests PRIVATE
+        smc_line_checker
         line_logger
         Catch2::Catch2WithMain
 )
 
-add_test(NAME regex_checker_tests COMMAND line_checker_test)
+add_test(NAME smc_checker_tests COMMAND line_checker_test)
