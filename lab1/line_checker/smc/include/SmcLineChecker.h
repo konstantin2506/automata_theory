@@ -26,7 +26,6 @@ namespace LineChecker
         }
         void setInCorrect()
         {
-            std::cout << "error!!!" << std::endl;
             correct = false;
 
         }

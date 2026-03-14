@@ -76,9 +76,7 @@
         }
    }
    UnaryMinus1{
-        checkNext(ch : char) [std::isalpha(ch) ] Var2 {
-            var2PushChar(ch);
-        }
+
         checkNext(ch : char) [std::isdigit(ch) ] Number1 {
             setDone();
         }
@@ -176,7 +174,7 @@
             setDone();
         }
 
-        checkNext(ch : char) [ ch == '-' ] UnaryMinus1 {}
+        checkNext(ch : char) [ ch == '-' ] UnaryMinus2 {}
 
         checkNext(ch : char) [std::isdigit(ch)] Number2 {
             setDone();
@@ -187,11 +185,6 @@
         }
    }
    UnaryMinus2{
-        checkNext(ch : char) [std::isalpha(ch)] Var3 {
-            var3PushChar(ch);
-            setDone();
-        }
-
         checkNext(ch : char) [std::isdigit(ch)] Number2 {
             setDone();
         }

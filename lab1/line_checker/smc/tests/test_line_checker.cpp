@@ -21,7 +21,7 @@ TEST_CASE("SMC")
                       "7 camelCase = variable\n"
                       "8 underscore_var = val\n"
                       "9 mix123 = 456abc\n"
-                      "10 simple = test\n");
+                      "10 X = test\n");
 
         LineLogger logger;
         SmcLineChecker checker;
@@ -30,7 +30,7 @@ TEST_CASE("SMC")
         while (std::getline(input, line)) {
             checker.checkLine(line, logger);
         }
-        CHECK(logger.getVariableCount("x") == 1);
+        CHECK(logger.getVariableCount("x") == 2);
         CHECK(logger.getVariableCount("y") == 1);
         CHECK(logger.getVariableCount("z") == 1);
         CHECK(logger.getVariableCount("var") == 1);
@@ -48,7 +48,7 @@ TEST_CASE("SMC")
         public:
             void incrementCount(std::string_view variable) override {};
 
-            [[nodiscard]] int getVariableCount(std::string_view variable) override {return 0;};
+            [[nodiscard]] int getVariableCount(std::string_view variable)const  override {return 0;};
 
             [[nodiscard]] std::string generateReport() const override {return "";};
         };

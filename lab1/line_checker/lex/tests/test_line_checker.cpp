@@ -4,11 +4,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "line_logger.h"
-#include "regex_line_checker.h"
+#include "lex_line_checker.h"
 
 using namespace LineChecker;
 
-TEST_CASE("Regex")
+TEST_CASE("Lex")
 {
     SECTION("Basic test")
     {
@@ -24,7 +24,7 @@ TEST_CASE("Regex")
                       "10 X = test\n");
 
         LineLogger logger;
-        RegexLineChecker checker;
+        LexLineChecker checker;
 
         std::string line;
         while (std::getline(input, line)) {
@@ -48,11 +48,11 @@ TEST_CASE("Regex")
         public:
             void incrementCount(std::string_view variable) override {};
 
-            [[nodiscard]] int getVariableCount(std::string_view variable) const override {return 0;};
+            [[nodiscard]] int getVariableCount(std::string_view variable)const  override {return 0;};
 
             [[nodiscard]] std::string generateReport() const override {return "";};
         };
-        RegexLineChecker checker;
+        LexLineChecker checker;
         MockLogger logger;
 
         CHECK(checker.checkLine("", logger) == false);

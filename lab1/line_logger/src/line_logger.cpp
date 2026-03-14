@@ -1,11 +1,16 @@
 #include "line_logger.h"
+
+#include <algorithm>
+#include <ranges>
 #include <sstream>
 using namespace LineChecker;
 
 
 void LineLogger::incrementCount(std::string_view variable)
 {
-    variables_[variable.data()] += 1;
+    std::string lowerCased{variable};
+    std::ranges::transform(lowerCased.begin(), lowerCased.end(), lowerCased.begin(), ::tolower);
+    variables_[lowerCased] += 1;
 }
 
 std::string LineLogger::generateReport() const
@@ -17,9 +22,11 @@ std::string LineLogger::generateReport() const
     return report.str();
 }
 
-int LineLogger::getVariableCount(std::string_view variable)
+int LineLogger::getVariableCount(std::string_view variable) const
 {
-    const auto it = variables_.find(variable.data());
+    std::string lowerCased{variable};
+    std::ranges::transform(lowerCased.begin(), lowerCased.end(), lowerCased.begin(), ::tolower);
+    const auto it = variables_.find(lowerCased);
     if (it == variables_.end()) {
         return 0;
     }

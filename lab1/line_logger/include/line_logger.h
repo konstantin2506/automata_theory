@@ -12,7 +12,7 @@ namespace LineChecker
     public:
         void incrementCount(std::string_view variable) override;
         [[nodiscard]] std::string generateReport() const override;
-        [[nodiscard]] int getVariableCount(std::string_view variable) override;
+        [[nodiscard]] int getVariableCount(std::string_view variable) const override;
     };
 }
 

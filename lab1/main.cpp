@@ -2,13 +2,13 @@
 #include <iostream>
 
 #include "line_logger.h"
-#include "SmcLineChecker.h"
+#include "lex_line_checker.h"
 
 
 int main() {
 
     LineChecker::LineLogger logger;
-    LineChecker::SmcLineChecker checker;
+    LineChecker::LexLineChecker checker;
     int c = 0;
     auto handle = [&](std::istream &file)
     {

@@ -312,25 +312,8 @@ namespace LineChecker
     {
         SmcLineChecker& ctxt = context.getOwner();
 
-        if (std::isalpha(ch) )
+        if (std::isdigit(ch) )
         {
-            context.getState().Exit(context);
-            context.clearState();
-            try
-            {
-                ctxt.var2PushChar(ch);
-                context.setState(Cases::Var2);
-            }
-            catch (...)
-            {
-                context.setState(Cases::Var2);
-                throw;
-            }
-            context.getState().Entry(context);
-        }
-        else if (std::isdigit(ch) )
-    
-    {
             context.getState().Exit(context);
             context.clearState();
             try
@@ -715,7 +698,7 @@ namespace LineChecker
     {
             context.getState().Exit(context);
             // No actions.
-            context.setState(Cases::UnaryMinus1);
+            context.setState(Cases::UnaryMinus2);
             context.getState().Entry(context);
         }
         else if (std::isdigit(ch))
@@ -758,26 +741,8 @@ namespace LineChecker
     {
         SmcLineChecker& ctxt = context.getOwner();
 
-        if (std::isalpha(ch))
+        if (std::isdigit(ch))
         {
-            context.getState().Exit(context);
-            context.clearState();
-            try
-            {
-                ctxt.var3PushChar(ch);
-                ctxt.setDone();
-                context.setState(Cases::Var3);
-            }
-            catch (...)
-            {
-                context.setState(Cases::Var3);
-                throw;
-            }
-            context.getState().Entry(context);
-        }
-        else if (std::isdigit(ch))
-    
-    {
             context.getState().Exit(context);
             context.clearState();
             try
