@@ -1,0 +1,3 @@
+module kregex
+
+go 1.26.1
