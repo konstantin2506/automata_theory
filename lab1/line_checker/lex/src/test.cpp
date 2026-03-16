@@ -1732,8 +1732,11 @@ YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
 	if ( ! buf )
 		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
+	//strcpy(buf, yybytes);
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
+
+	//memcpy( buf, yybytes, _yybytes_len  );
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 

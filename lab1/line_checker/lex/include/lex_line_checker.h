@@ -10,6 +10,7 @@ struct yy_buffer_state;
 
 extern int yylex();
 extern yy_buffer_state* yy_scan_string(const char*);
+extern yy_buffer_state* yy_scan_buffer  (char * base, size_t  size );
 extern void yy_delete_buffer(yy_buffer_state*);
 
 extern char* var1_;

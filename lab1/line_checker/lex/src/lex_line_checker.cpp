@@ -9,8 +9,10 @@ bool LexLineChecker::checkLine(const std::string &input, ILineLogger &logger)
     bool valid = false;
     bool finished = false;
     std::vector<std::string> vars;
+
     auto buff = yy_scan_string(input.c_str());
 
+    //auto buff = yy_scan_buffer((char*)&input[0], input.size());
     while ((token = static_cast<Tokens>(yylex()) ) > 0  && !finished) {
         switch (token) {
             case ID:

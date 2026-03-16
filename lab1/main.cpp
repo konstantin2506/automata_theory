@@ -3,12 +3,15 @@
 
 #include "line_logger.h"
 #include "lex_line_checker.h"
+#include "line_checker/smc/include/SmcLineChecker.h"
 
 
 int main() {
 
+
+    LineChecker::SmcLineChecker checker;
     LineChecker::LineLogger logger;
-    LineChecker::LexLineChecker checker;
+
     int c = 0;
     auto handle = [&](std::istream &file)
     {
@@ -47,5 +50,5 @@ int main() {
             handle(inputFile);
             break;
     }
-    std::cout << logger.generateReport();
+    std::cout <<"Report:\n"<< logger.generateReport();
 }
