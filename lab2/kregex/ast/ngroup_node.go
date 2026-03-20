@@ -1,4 +1,4 @@
-package nodes
+package ast
 
 // R"(<varible_name>[a-zA-Z])" видимо
 
@@ -11,8 +11,8 @@ func (n *NamedGroupNode) Children() []Node {
 	return []Node{n.child}
 }
 
-func (n *NamedGroupNode) Name() string {
-	return "ngroup"
+func (n *NamedGroupNode) Type() NodeT {
+	return NamedGroup
 }
 
 func (n *NamedGroupNode) GroupName() string {

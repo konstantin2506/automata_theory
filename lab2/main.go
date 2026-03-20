@@ -3,15 +3,11 @@ package main
 import (
 	"fmt"
 
-	kregex "kregex/kregex"
+	"kregex/kregex/ast"
 )
 
 func main() {
-	fmt.Println("Hello from kregex")
-	_, err := kregex.BuildAST("(()(hello thesre)(()))")
-	if err != nil {
-		fmt.Println("Error:", err)
-	} else {
-		fmt.Println("OK")
-	}
+	str := "((abc(q+))df(ijk)*)"
+	fmt.Println(str)
+	ast.BuildAst(str)
 }

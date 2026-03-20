@@ -1,4 +1,4 @@
-package nodes
+package ast
 
 type OrNode struct {
 	left  Node

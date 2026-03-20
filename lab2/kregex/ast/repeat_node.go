@@ -1,4 +1,4 @@
-package nodes
+package ast
 
 type RepeatNode struct {
 	child Node
@@ -9,8 +9,8 @@ func (n *RepeatNode) Children() []Node {
 	return []Node{n.child}
 }
 
-func (n *RepeatNode) Name() string {
-	return "Repeat"
+func (n *RepeatNode) Type() NodeT {
+	return Repeat
 }
 
 func (n *RepeatNode) Count() uint32 {
