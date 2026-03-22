@@ -7,7 +7,13 @@ import (
 )
 
 func main() {
-	str := "((abc(q+))df(ijk)*)"
+	str := "(abc(qx)?(please)?)"
 	fmt.Println(str)
-	ast.BuildAst(str)
+	ast, err := ast.BuildAst(str)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	ast.Print(1)
 }

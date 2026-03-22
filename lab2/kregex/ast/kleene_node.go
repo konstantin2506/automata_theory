@@ -11,3 +11,7 @@ func (n *KleeneNode) Children() []Node {
 func (n *KleeneNode) Type() NodeT {
 	return Kleene
 }
+
+func (n *KleeneNode) String() string {
+	return "Kleene"
+}

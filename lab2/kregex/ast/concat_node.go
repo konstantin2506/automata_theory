@@ -1,13 +1,17 @@
 package ast
 
 type ConcatNode struct {
-	childs []Node
+	children []Node
 }
 
 func (n *ConcatNode) Children() []Node {
-	return n.childs
+	return n.children
 }
 
 func (n *ConcatNode) Type() NodeT {
 	return Concat
+}
+
+func (n *ConcatNode) String() string {
+	return "Concat"
 }

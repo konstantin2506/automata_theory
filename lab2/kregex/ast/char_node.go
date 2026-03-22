@@ -11,3 +11,7 @@ func (n *CharNode) Children() []Node {
 func (n *CharNode) Type() NodeT {
 	return Char
 }
+
+func (n *CharNode) String() string {
+	return string(n.char)
+}

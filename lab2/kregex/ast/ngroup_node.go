@@ -15,6 +15,6 @@ func (n *NamedGroupNode) Type() NodeT {
 	return NamedGroup
 }
 
-func (n *NamedGroupNode) GroupName() string {
+func (n *NamedGroupNode) String() string {
 	return n.name
 }

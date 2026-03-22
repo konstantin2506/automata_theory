@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 type ReferenceNode struct {
 	refName string
 }
@@ -12,6 +14,6 @@ func (n *ReferenceNode) Type() NodeT {
 	return Reference
 }
 
-func (n *ReferenceNode) RefName() string {
-	return n.refName
+func (n *ReferenceNode) String() string {
+	return fmt.Sprintf("ref: %s", n.refName)
 }

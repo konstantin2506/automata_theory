@@ -3,6 +3,7 @@ package ast
 type Node interface {
 	Children() []Node
 	Type() NodeT
+	String() string
 }
 
 type NodeT int
@@ -16,4 +17,5 @@ const (
 	Reference
 	Repeat
 	Char
+	OpenParen
 )

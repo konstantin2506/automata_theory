@@ -11,3 +11,7 @@ func (n *OptionalNode) Children() []Node {
 func (n *OptionalNode) Type() NodeT {
 	return Optional
 }
+
+func (n OptionalNode) String() string {
+	return "Optional"
+}
