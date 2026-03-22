@@ -4,6 +4,7 @@ package ast
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -11,6 +12,7 @@ type Ast struct {
 	root Node
 }
 
+// "(ab(c?)...)"
 //"abc(lq+)*"
 //[a b c l]
 //+ -> [+node]
@@ -28,6 +30,35 @@ func BuildAst(str string) (Ast, error) {
 			ns.Push(&OpenParenNode{})
 		case '?':
 			ns.Push(&OptionalNode{})
+		case '.':
+			if (i < len(str)-2) && str[i:i+3] == "..." {
+				ns.Push(&KleeneNode{})
+				i += 2
+			} else {
+				ns.Push(&CharNode{ch})
+			}
+		case '{':
+			start := i
+			end := strings.Index(str[i:], "}")
+			if end != -1 {
+				count, err := strconv.ParseUint(str[start+1:start+end], 10, 64)
+				if err != nil {
+					return Ast{}, fmt.Errorf("incorrect count in braces: %s", str[start+1:start+end])
+				}
+				ns.Push(&RepeatNode{nil, uint32(count)})
+				i += end
+			} else {
+				ns.Push(&CharNode{ch})
+			}
+		case '|':
+			ns.Push(&OrNode{})
+		case '%':
+			if i > len(str)-2 || str[i+2] != '%' {
+				return Ast{}, fmt.Errorf("incorrect escape symbol usage, pos: %d", i)
+			}
+			ns.Push(&CharNode{str[i+1]})
+			i += 2
+
 		default:
 			ns.Push(&CharNode{ch})
 		}
@@ -46,6 +77,8 @@ func HandleNodes(ns NodeStack) NodeStack {
 		ns.Pop()
 
 		switch current.Type() {
+		case Or:
+			newNodeStack.Push(current)
 		case Optional:
 			if ns.Top().Type() == OpenParen {
 				newNodeStack.Push(current)
@@ -59,6 +92,25 @@ func HandleNodes(ns NodeStack) NodeStack {
 			newNodeStack.Push(current)
 		case Concat:
 			newNodeStack.Push(current)
+		case Kleene:
+			if ns.Top().Type() == OpenParen {
+				newNodeStack.Push(current)
+				break
+			}
+			child := ns.Top()
+			ns.Pop()
+			current.(*KleeneNode).child = child
+			newNodeStack.Push(current)
+
+		case Repeat:
+			if ns.Top().Type() == OpenParen {
+				newNodeStack.Push(current)
+				break
+			}
+			child := ns.Top()
+			ns.Pop()
+			current.(*RepeatNode).child = child
+			newNodeStack.Push(current)
 		}
 	}
 	ns.Pop()
@@ -68,13 +120,29 @@ func HandleNodes(ns NodeStack) NodeStack {
 		right := newNodeStack.Top()
 		newNodeStack.Pop()
 		newChildren := []Node{}
-		if current.Type() == Concat {
-			newChildren = append(current.(*ConcatNode).children, right)
+		if right.Type() == Or {
+			if current.Type() == Or {
+				current.(*OrNode).childs = append(current.(*OrNode).childs, newNodeStack.Top())
+				newNodeStack.Pop()
+				newNodeStack.Push(current)
+			} else {
+				childs := []Node{}
+				childs = append(childs, current)
+				childs = append(childs, newNodeStack.Top())
+				newNodeStack.Pop()
+				right.(*OrNode).childs = childs
+				newNodeStack.Push(right)
+			}
 		} else {
-			newChildren = append(newChildren, current)
-			newChildren = append(newChildren, right)
+			if current.Type() == Concat {
+				newChildren = append(current.(*ConcatNode).children, right)
+			} else {
+				newChildren = append(newChildren, current)
+				newChildren = append(newChildren, right)
+			}
+			newNodeStack.Push(&ConcatNode{newChildren})
 		}
-		newNodeStack.Push(&ConcatNode{newChildren})
+
 	}
 
 	ns.Push(newNodeStack.Top())
