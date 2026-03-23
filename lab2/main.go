@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "(a|b%%%%(cd))"
+	str := "(a|b%%(cd))"
 	fmt.Println(str)
 	ast, err := ast.BuildAst(str)
 	if err != nil {
