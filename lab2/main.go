@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "(a|b%%(cd))"
+	str := "((a(<inner>b...)?|c{2}))"
 	fmt.Println(str)
 	ast, err := ast.BuildAst(str)
 	if err != nil {

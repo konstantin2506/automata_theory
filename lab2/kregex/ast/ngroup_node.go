@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 // R"(<varible_name>[a-zA-Z])" видимо
 
 type NamedGroupNode struct {
@@ -16,5 +18,5 @@ func (n *NamedGroupNode) Type() NodeT {
 }
 
 func (n *NamedGroupNode) String() string {
-	return n.name
+	return fmt.Sprintf("named_group[%s]", n.name)
 }

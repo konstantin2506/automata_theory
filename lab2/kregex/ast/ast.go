@@ -29,9 +29,15 @@ func BuildAst(str string) (Ast, error) {
 		case '(':
 			ns.Push(&OpenParenNode{})
 		case '?':
+			if i+3 < len(str) && str[i+1:i+4] == "..." {
+				return Ast{}, fmt.Errorf("combo '?...' is incorrect")
+			}
 			ns.Push(&OptionalNode{})
 		case '.':
 			if (i < len(str)-2) && str[i:i+3] == "..." {
+				if i+3 < len(str) && str[i+3] == '?' {
+					return Ast{}, fmt.Errorf("combo '...?' is incorrect")
+				}
 				ns.Push(&KleeneNode{})
 				i += 2
 			} else {
@@ -48,8 +54,10 @@ func BuildAst(str string) (Ast, error) {
 				ns.Push(&RepeatNode{nil, uint32(count)})
 				i += end
 			} else {
-				ns.Push(&CharNode{ch})
+				return Ast{}, fmt.Errorf("'{' does not have a paired '}'")
 			}
+		case '}':
+			return Ast{}, fmt.Errorf("'}' does not have a paired '{'")
 		case '|':
 			ns.Push(&OrNode{})
 		case '%':
@@ -58,25 +66,49 @@ func BuildAst(str string) (Ast, error) {
 			}
 			ns.Push(&CharNode{str[i+1]})
 			i += 2
+		case '<':
+			if i == 0 || str[i-1] != '(' {
+				return Ast{}, fmt.Errorf("group name does not start with '(', pos=%d", i)
+			}
+			start := i
+			end := strings.Index(str[i:], ">")
+			if end != -1 {
+				ns.Push(&NamedGroupNode{nil, str[start+1 : start+end]})
+				i += end
+			} else {
+				return Ast{}, fmt.Errorf("'<' does not have a paired '>'")
+			}
+		case '>':
+			return Ast{}, fmt.Errorf("'>' does not have a paired '<'")
 
 		default:
 			ns.Push(&CharNode{ch})
 		}
 	}
-	if ns.isEmpty() {
-		return Ast{}, fmt.Errorf("error in stack while BuildAst")
+
+	if ns.Size() != 1 {
+		return Ast{}, fmt.Errorf("error in stack while BuildAst (bad parens)")
 	}
 	return Ast{ns.Top()}, nil
 }
 
 func HandleNodes(ns NodeStack) NodeStack {
 	newNodeStack := NodeStack{}
-
+	withNamedGroup := false
+	var gname Node
 	for ns.Top().Type() != OpenParen {
 		current := ns.Top()
 		ns.Pop()
 
 		switch current.Type() {
+		case NamedGroup:
+
+			if current.(*NamedGroupNode).child == nil {
+				withNamedGroup = true
+				gname = current
+			} else {
+				newNodeStack.Push(current)
+			}
 		case Or:
 			newNodeStack.Push(current)
 		case Optional:
@@ -84,6 +116,12 @@ func HandleNodes(ns NodeStack) NodeStack {
 				newNodeStack.Push(current)
 				break
 			}
+			if ns.Top().Type() == NamedGroup {
+				newNodeStack.Push(current)
+				withNamedGroup = true
+				break
+			}
+
 			child := ns.Top()
 			ns.Pop()
 			current.(*OptionalNode).child = child
@@ -97,6 +135,11 @@ func HandleNodes(ns NodeStack) NodeStack {
 				newNodeStack.Push(current)
 				break
 			}
+			if ns.Top().Type() == NamedGroup {
+				newNodeStack.Push(current)
+				withNamedGroup = true
+				break
+			}
 			child := ns.Top()
 			ns.Pop()
 			current.(*KleeneNode).child = child
@@ -107,6 +150,11 @@ func HandleNodes(ns NodeStack) NodeStack {
 				newNodeStack.Push(current)
 				break
 			}
+			if ns.Top().Type() == NamedGroup {
+				newNodeStack.Push(current)
+				withNamedGroup = true
+				break
+			}
 			child := ns.Top()
 			ns.Pop()
 			current.(*RepeatNode).child = child
@@ -114,6 +162,14 @@ func HandleNodes(ns NodeStack) NodeStack {
 		}
 	}
 	ns.Pop()
+	if newNodeStack.isEmpty() {
+		if withNamedGroup {
+			gname.(*NamedGroupNode).child = ns.Top()
+			ns.Pop()
+		}
+		ns.Push(gname)
+		return ns
+	}
 	for newNodeStack.Size() != 1 {
 		current := newNodeStack.Top()
 		newNodeStack.Pop()
@@ -143,10 +199,13 @@ func HandleNodes(ns NodeStack) NodeStack {
 			newNodeStack.Push(&ConcatNode{newChildren})
 		}
 
+	} // TODO
+	if withNamedGroup && gname != nil {
+		gname.(*NamedGroupNode).child = newNodeStack.Top()
+		ns.Push(gname)
+	} else if withNamedGroup && gname == nil {
+		ns.Push(newNodeStack.Top())
 	}
-
-	ns.Push(newNodeStack.Top())
-
 	return ns
 }
 
