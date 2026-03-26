@@ -1,0 +1,9 @@
+cmake-build-debug
+*.a
+*.s
+*.o
+*.so
+*.out
+lab1
+.idea
+build

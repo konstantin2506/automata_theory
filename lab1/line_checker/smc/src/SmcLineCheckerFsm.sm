@@ -1,0 +1,232 @@
+%class SmcLineChecker
+%package LineChecker
+
+
+%header SmcLineChecker.h
+%fsmclass SmcLineCheckerFsm
+%fsmfile SmcLineCheckerFsm
+
+%access package
+
+%start Cases::LineNumber
+
+%map Cases
+%%
+   LineNumber{
+        checkNext(ch : char) [std::isdigit(ch) ] nil{}
+
+        checkNext(ch : char) [std::isspace(ch) ] Spaces1{}
+        checkNext(ch : char)  Error{
+            setInCorrect();
+        }
+   }
+
+   Spaces1{
+        checkNext(ch : char) [std::isspace(ch) ] nil{}
+
+        checkNext(ch : char) [std::isalpha(ch) ] Var1{
+            var1PushChar(ch);
+        }
+
+        checkNext(ch : char)  Error{
+                    setInCorrect();
+                }
+   }
+
+   Var1{
+        checkNext(ch : char) [ch == '='] Assignment {}
+
+        checkNext(ch : char) [std::isalpha(ch) && ctxt.var1Size() < 15] nil{
+            var1PushChar(ch);
+        }
+        checkNext(ch : char) [std::isdigit(ch)  && ctxt.var1Size() < 15] nil{
+            var1PushChar(ch);
+        }
+        checkNext(ch : char) [std::isspace(ch)] Spaces2{}
+
+
+        checkNext(ch : char)  Error{
+              setInCorrect();
+        }
+
+   }
+
+   Spaces2{
+        checkNext(ch : char) [std::isspace(ch) ] nil{}
+
+        checkNext(ch : char) [ch == '='] Assignment {}
+
+        checkNext(ch : char)  Error{
+            setInCorrect();
+        }
+   }
+
+   Assignment{
+        checkNext(ch : char) [std::isalpha(ch) ] Var2 {
+            var2PushChar(ch);
+        }
+        checkNext(ch : char) [std::isdigit(ch) ] Number1 {
+            setDone();
+        }
+        checkNext(ch : char) [ ch == '-' ] UnaryMinus1 {}
+        checkNext(ch : char) [std::isspace(ch) ] Spaces3 {}
+
+        checkNext(ch : char) Error {
+            setInCorrect();
+        }
+   }
+   UnaryMinus1{
+
+        checkNext(ch : char) [std::isdigit(ch) ] Number1 {
+            setDone();
+        }
+
+        checkNext(ch : char) Error {
+            setInCorrect();
+        }
+   }
+
+   Number1{
+        checkNext(ch : char) [std::isdigit(ch) ] nil {
+        }
+
+        checkNext(ch : char) [std::isspace(ch) ] Spaces4 {}
+
+        checkNext(ch : char) [ch == '+' || ch == '-' || ch == '/' || ch == '*'] Operation {
+            setNotDone();
+        }
+        checkNext(ch : char) Error {
+             setInCorrect();
+        }
+
+   }
+
+   Spaces3{
+        checkNext(ch : char) [std::isspace(ch) ] nil{}
+
+        checkNext(ch : char) [ ch == '-' ] UnaryMinus1 {}
+
+        checkNext(ch : char) [std::isdigit(ch)] Number1 {
+            setDone();
+        }
+
+        checkNext(ch : char) [std::isalpha(ch)] Var2 {
+            var2PushChar(ch);
+            setDone();
+        }
+
+        checkNext(ch : char)  Error{
+            setInCorrect();
+        }
+   }
+
+   Var2{
+        checkNext(ch : char) [std::isalpha(ch) && ctxt.var2Size() < 15] nil{
+            var2PushChar(ch);
+        }
+        checkNext(ch : char) [std::isdigit(ch)  && ctxt.var2Size() < 15] nil{
+            var2PushChar(ch);
+        }
+        checkNext(ch : char) [std::isspace(ch)] Spaces4{}
+
+        checkNext(ch : char) [ch == '+' || ch == '-' || ch == '/' || ch == '*'] Operation {
+            setNotDone();
+        }
+
+        checkNext(ch : char)  Error{
+              setInCorrect();
+        }
+   }
+
+   Spaces4{
+        checkNext(ch : char) [std::isspace(ch) ] nil{}
+
+        checkNext(ch : char) [ch == '+' || ch == '-' || ch == '/' || ch == '*'] Operation {
+            setNotDone();
+        }
+
+        checkNext(ch : char)  Error{
+            setInCorrect();
+        }
+   }
+   Operation{
+        checkNext(ch : char) [std::isspace(ch)] Spaces5 {}
+
+        checkNext(ch : char) [std::isalpha(ch)] Var3 {
+            var3PushChar(ch);
+            setDone();
+        }
+
+        checkNext(ch : char) [ ch == '-' ] UnaryMinus2 {}
+
+        checkNext(ch : char) [std::isdigit(ch)] Number2 {
+            setDone();
+        }
+        checkNext(ch : char)  Error{
+              setInCorrect();
+        }
+   }
+   Spaces5{
+        checkNext(ch : char) [std::isspace(ch) ] nil{}
+
+        checkNext(ch : char) [std::isalpha(ch)] Var3 {
+            var3PushChar(ch);
+            setDone();
+        }
+
+        checkNext(ch : char) [ ch == '-' ] UnaryMinus2 {}
+
+        checkNext(ch : char) [std::isdigit(ch)] Number2 {
+            setDone();
+        }
+
+        checkNext(ch : char)  Error{
+            setInCorrect();
+        }
+   }
+   UnaryMinus2{
+        checkNext(ch : char) [std::isdigit(ch)] Number2 {
+            setDone();
+        }
+        checkNext(ch : char)  Error{
+            setInCorrect();
+        }
+   }
+
+   Number2{
+        checkNext(ch : char) [std::isdigit(ch)] nil {}
+
+        checkNext(ch : char) [std::isspace(ch)] Spaces6 {}
+        checkNext(ch : char) Error{
+            setInCorrect();
+        }
+   }
+
+   Var3{
+        checkNext(ch : char) [std::isalpha(ch) || std::isdigit(ch)] nil {
+            var3PushChar(ch);
+        }
+
+        checkNext(ch : char) [std::isspace(ch)] Spaces6 {}
+
+        checkNext(ch : char) Error{
+            setInCorrect();
+        }
+
+
+   }
+   Spaces6{
+        checkNext(ch : char) [std::isspace(ch) ] nil {}
+
+        checkNext(ch : char) Error{
+            setInCorrect();
+        }
+
+        reset() LineNumber {resetFSM();}
+   }
+
+   Error{
+        reset() LineNumber {resetFSM();}
+   }
+
+%%
