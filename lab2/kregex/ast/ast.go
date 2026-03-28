@@ -25,7 +25,7 @@ func BuildAst(str string) (Ast, error) {
 		ch := str[i]
 		switch ch {
 		case ')':
-			ns = HandleNodes(ns)
+			ns = HandleParens(ns)
 		case '(':
 			ns.Push(&OpenParenNode{})
 		case '?':
@@ -92,120 +92,11 @@ func BuildAst(str string) (Ast, error) {
 	return Ast{ns.Top()}, nil
 }
 
-func HandleNodes(ns NodeStack) NodeStack {
-	newNodeStack := NodeStack{}
-	withNamedGroup := false
-	var gname Node
-	for ns.Top().Type() != OpenParen {
-		current := ns.Top()
-		ns.Pop()
-
-		switch current.Type() {
-		case NamedGroup:
-
-			if current.(*NamedGroupNode).child == nil {
-				withNamedGroup = true
-				gname = current
-			} else {
-				newNodeStack.Push(current)
-			}
-		case Or:
-			newNodeStack.Push(current)
-		case Optional:
-			if ns.Top().Type() == OpenParen {
-				newNodeStack.Push(current)
-				break
-			}
-			if ns.Top().Type() == NamedGroup {
-				newNodeStack.Push(current)
-				withNamedGroup = true
-				break
-			}
-
-			child := ns.Top()
-			ns.Pop()
-			current.(*OptionalNode).child = child
-			newNodeStack.Push(current)
-		case Char:
-			newNodeStack.Push(current)
-		case Concat:
-			newNodeStack.Push(current)
-		case Kleene:
-			if ns.Top().Type() == OpenParen {
-				newNodeStack.Push(current)
-				break
-			}
-			if ns.Top().Type() == NamedGroup {
-				newNodeStack.Push(current)
-				withNamedGroup = true
-				break
-			}
-			child := ns.Top()
-			ns.Pop()
-			current.(*KleeneNode).child = child
-			newNodeStack.Push(current)
-
-		case Repeat:
-			if ns.Top().Type() == OpenParen {
-				newNodeStack.Push(current)
-				break
-			}
-			if ns.Top().Type() == NamedGroup {
-				newNodeStack.Push(current)
-				withNamedGroup = true
-				break
-			}
-			child := ns.Top()
-			ns.Pop()
-			current.(*RepeatNode).child = child
-			newNodeStack.Push(current)
-		}
-	}
-	ns.Pop()
-	if newNodeStack.isEmpty() {
-		if withNamedGroup {
-			gname.(*NamedGroupNode).child = ns.Top()
-			ns.Pop()
-		}
-		ns.Push(gname)
-		return ns
-	}
-	for newNodeStack.Size() != 1 {
-		current := newNodeStack.Top()
-		newNodeStack.Pop()
-		right := newNodeStack.Top()
-		newNodeStack.Pop()
-		newChildren := []Node{}
-		if right.Type() == Or {
-			if current.Type() == Or {
-				current.(*OrNode).childs = append(current.(*OrNode).childs, newNodeStack.Top())
-				newNodeStack.Pop()
-				newNodeStack.Push(current)
-			} else {
-				childs := []Node{}
-				childs = append(childs, current)
-				childs = append(childs, newNodeStack.Top())
-				newNodeStack.Pop()
-				right.(*OrNode).childs = childs
-				newNodeStack.Push(right)
-			}
-		} else {
-			if current.Type() == Concat {
-				newChildren = append(current.(*ConcatNode).children, right)
-			} else {
-				newChildren = append(newChildren, current)
-				newChildren = append(newChildren, right)
-			}
-			newNodeStack.Push(&ConcatNode{newChildren})
-		}
-
-	} // TODO
-	if withNamedGroup && gname != nil {
-		gname.(*NamedGroupNode).child = newNodeStack.Top()
-		ns.Push(gname)
-	} else if withNamedGroup && gname == nil {
-		ns.Push(newNodeStack.Top())
-	}
+func HandleParens(ns NodeStack) NodeStack {
+	concatStack, gname := HandleFirstPriorityOps(&ns)
+	orStack := ConcatinateNodes(&concatStack)
+	orNode := HandleOrNodes(&orStack)
+	HandleLastNode(&ns, &concatStack, gname, orNode)
 	return ns
 }
 
@@ -222,5 +113,114 @@ func (ast *Ast) Print(depth int) {
 		} else {
 			fmt.Printf("nil\n")
 		}
+	}
+}
+
+func HandleFirstPriorityOps(ns *NodeStack) (NodeStack, Node) {
+	concatStack := NodeStack{}
+	var gname Node
+	for ns.Top().Type() != OpenParen { // связываем операции первого приоритета, добавляем в стек для конкатенации
+		current := ns.Top()
+		ns.Pop()
+
+		switch current.Type() {
+		case NamedGroup:
+			if current.(*NamedGroupNode).child == nil {
+				gname = current
+			} else {
+				concatStack.Push(current)
+			}
+		case Or:
+			concatStack.Push(current)
+		case Optional:
+			if ns.Top().Type() == OpenParen {
+				concatStack.Push(current)
+				break
+			}
+			child := ns.Top()
+			ns.Pop()
+			current.(*OptionalNode).child = child
+			concatStack.Push(current)
+		case Char:
+			concatStack.Push(current)
+		case Concat:
+			concatStack.Push(current)
+		case Kleene:
+			if ns.Top().Type() == OpenParen {
+				concatStack.Push(current)
+				break
+			}
+			if current.(*KleeneNode).child == nil {
+				child := ns.Top()
+				ns.Pop()
+				current.(*KleeneNode).child = child
+			}
+			concatStack.Push(current)
+		case Repeat:
+			if ns.Top().Type() == OpenParen {
+				concatStack.Push(current)
+				break
+			}
+			child := ns.Top()
+			ns.Pop()
+			current.(*RepeatNode).child = child
+			concatStack.Push(current)
+		}
+	}
+	ns.Pop()
+	return concatStack, gname
+}
+
+func ConcatinateNodes(concatStack *NodeStack) NodeStack {
+	orStack := NodeStack{}
+	for concatStack.Size() != 1 { // пытаемся конкатенировать, добавляем склеенные кусочки в стек для or
+		current := concatStack.Top()
+		concatStack.Pop()
+		right := concatStack.Top()
+		concatStack.Pop()
+		newChildren := []Node{}
+		if right.Type() == Or {
+			orStack.Push(current)
+			if len(right.Children()) != 0 {
+				orStack.Push(right)
+			}
+		} else {
+			if current.Type() == Concat {
+				newChildren = append(current.(*ConcatNode).children, right)
+			} else {
+				newChildren = append(newChildren, current)
+				newChildren = append(newChildren, right)
+			}
+			concatStack.Push(&ConcatNode{newChildren})
+		}
+	}
+	return orStack
+}
+
+func HandleOrNodes(orStack *NodeStack) OrNode {
+	orNode := OrNode{}
+	for !orStack.isEmpty() { // or от всех кусочков
+		orNode.childs = append(orNode.childs, orStack.Top())
+		orStack.Pop()
+	}
+	return orNode
+}
+
+func HandleLastNode(ns, concatStack *NodeStack, gname Node, orNode OrNode) {
+	if gname == nil {
+		if len(orNode.childs) == 0 {
+			ns.Push(concatStack.Top())
+		} else {
+			orNode.childs = append(orNode.childs, concatStack.Top())
+			ns.Push(&orNode)
+		}
+	} else {
+		if len(orNode.childs) == 0 {
+			gname.(*NamedGroupNode).child = concatStack.Top()
+		} else {
+			orNode.childs = append(orNode.childs, concatStack.Top())
+			gname.(*NamedGroupNode).child = &orNode
+		}
+		ns.Push(gname)
 	}
 }

@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	str := "((a(<inner>b...)?|c{2}))"
+	str := "((a|b)|(<Q>q{10})(<C>c...))"
+	//[(), ?, |, +, ()]
 	fmt.Println(str)
 	ast, err := ast.BuildAst(str)
 	if err != nil {
