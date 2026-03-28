@@ -16,5 +16,5 @@ func (n *RepeatNode) Type() NodeT {
 }
 
 func (n *RepeatNode) String() string {
-	return fmt.Sprintf("Repeat: %d", n.count)
+	return fmt.Sprintf("Repeat:%d", n.count)
 }

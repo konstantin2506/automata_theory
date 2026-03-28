@@ -19,6 +19,7 @@ type Ast struct {
 //q ->
 
 func BuildAst(str string) (Ast, error) {
+	str = fmt.Sprintf("(%s)", str)
 	ns := NodeStack{}
 
 	for i := 0; i < len(str); i++ {
@@ -27,6 +28,9 @@ func BuildAst(str string) (Ast, error) {
 		case ')':
 			ns = HandleParens(ns)
 		case '(':
+			if i+1 < len(str) && str[i+1] == ')' {
+				return Ast{}, fmt.Errorf("empty group not allowed at position %d", i)
+			}
 			ns.Push(&OpenParenNode{})
 		case '?':
 			if i+3 < len(str) && str[i+1:i+4] == "..." {
@@ -73,6 +77,9 @@ func BuildAst(str string) (Ast, error) {
 			start := i
 			end := strings.Index(str[i:], ">")
 			if end != -1 {
+				if len(str) > start+end && str[start+end+1] == ')' {
+					return Ast{}, fmt.Errorf("empty named group, pos: %d", start)
+				}
 				ns.Push(&NamedGroupNode{nil, str[start+1 : start+end]})
 				i += end
 			} else {
@@ -94,26 +101,34 @@ func BuildAst(str string) (Ast, error) {
 
 func HandleParens(ns NodeStack) NodeStack {
 	concatStack, gname := HandleFirstPriorityOps(&ns)
-	orStack := ConcatinateNodes(&concatStack)
-	orNode := HandleOrNodes(&orStack)
+	orNode := ConcatinateNodes(&concatStack)
 	HandleLastNode(&ns, &concatStack, gname, orNode)
 	return ns
 }
 
 func (ast *Ast) Print(depth int) {
+	fmt.Println(ast.TraverseRLR("", 1, '\n', " "))
+}
+
+func (ast *Ast) TraverseRLRSpace() string {
+	return ast.TraverseRLR("", 1, ' ', "")
+}
+
+func (ast *Ast) TraverseRLR(str string, depth int, delim byte, depthString string) string {
 	if depth == 1 {
-		fmt.Printf("%s\n", ast.root.String())
+		str = fmt.Sprintf("%s%c", ast.root.String(), delim)
 	}
 	for _, child := range ast.root.Children() {
 		if child != nil {
-			fmt.Printf("%s", strings.Repeat(" ", depth*2))
-			fmt.Printf("%s\n", child.String())
+			str += strings.Repeat(depthString, depth*2)
+			str += fmt.Sprintf("%s%c", child.String(), delim)
 			ast := Ast{child}
-			ast.Print(depth + 1)
+			str = ast.TraverseRLR(str, depth+1, delim, depthString)
 		} else {
-			fmt.Printf("nil\n")
+			str += fmt.Sprintf("nil%c", delim)
 		}
 	}
+	return str
 }
 
 func HandleFirstPriorityOps(ns *NodeStack) (NodeStack, Node) {
@@ -171,8 +186,8 @@ func HandleFirstPriorityOps(ns *NodeStack) (NodeStack, Node) {
 	return concatStack, gname
 }
 
-func ConcatinateNodes(concatStack *NodeStack) NodeStack {
-	orStack := NodeStack{}
+func ConcatinateNodes(concatStack *NodeStack) OrNode {
+	orNode := OrNode{}
 	for concatStack.Size() != 1 { // пытаемся конкатенировать, добавляем склеенные кусочки в стек для or
 		current := concatStack.Top()
 		concatStack.Pop()
@@ -180,9 +195,9 @@ func ConcatinateNodes(concatStack *NodeStack) NodeStack {
 		concatStack.Pop()
 		newChildren := []Node{}
 		if right.Type() == Or {
-			orStack.Push(current)
+			orNode.childs = append(orNode.childs, current)
 			if len(right.Children()) != 0 {
-				orStack.Push(right)
+				orNode.childs = append(orNode.childs, right)
 			}
 		} else {
 			if current.Type() == Concat {
@@ -193,15 +208,6 @@ func ConcatinateNodes(concatStack *NodeStack) NodeStack {
 			}
 			concatStack.Push(&ConcatNode{newChildren})
 		}
-	}
-	return orStack
-}
-
-func HandleOrNodes(orStack *NodeStack) OrNode {
-	orNode := OrNode{}
-	for !orStack.isEmpty() { // or от всех кусочков
-		orNode.childs = append(orNode.childs, orStack.Top())
-		orStack.Pop()
 	}
 	return orNode
 }

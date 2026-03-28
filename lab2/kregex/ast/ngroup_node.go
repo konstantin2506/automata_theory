@@ -18,5 +18,5 @@ func (n *NamedGroupNode) Type() NodeT {
 }
 
 func (n *NamedGroupNode) String() string {
-	return fmt.Sprintf("named_group[%s]", n.name)
+	return fmt.Sprintf("Named_group[%s]", n.name)
 }

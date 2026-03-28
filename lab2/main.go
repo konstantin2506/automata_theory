@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "((a|b)|(<Q>q{10})(<C>c...))"
+	str := "(<abc>)"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
 	ast, err := ast.BuildAst(str)
@@ -15,6 +15,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
+	res := ast.TraverseRLR("", 1, ' ', "")
+	fmt.Println(res)
 	ast.Print(1)
 }

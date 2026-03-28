@@ -7,7 +7,7 @@ import (
 
 func TestRepeatNode_String(t *testing.T) {
 	rnode := RepeatNode{nil, 10}
-	wait := "Repeat: 10"
+	wait := "Repeat:10"
 	if rnode.String() != wait {
 		t.Errorf("incorrect string, wait: %s, got: %s", wait, rnode.String())
 	}
