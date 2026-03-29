@@ -22,7 +22,7 @@ func TestRepeatNode_Type(t *testing.T) {
 }
 
 func TestRepeatNode_Children(t *testing.T) {
-	rnode := RepeatNode{&KleeneNode{&CharNode{'c'}}, 10}
+	rnode := RepeatNode{&KleeneNode{&CharNode{'c', 0}}, 10}
 	res := rnode.Children()
 	waitLen := 1
 	if len(res) != waitLen {

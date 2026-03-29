@@ -3,19 +3,26 @@ package main
 import (
 	"fmt"
 
-	"kregex/kregex/ast"
+	ast "kregex/kregex/ast"
+	dfa "kregex/kregex/dfa"
 )
 
 func main() {
-	str := "(<abc>)"
+	str := "(a|b)ba?"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
-	ast, err := ast.BuildAst(str)
+	tree, err := ast.BuildAst(str)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	res := ast.TraverseRLR("", 1, ' ', "")
-	fmt.Println(res)
-	ast.Print(1)
+	tree.Print(1)
+	specMap := ast.NewNodeSpecMap()
+	_, charNums := dfa.MarkChars(tree)
+
+	dfa.ComputeNullable(&tree, specMap)
+	dfa.ComputeFirst(&tree, specMap, charNums)
+	for key, value := range specMap {
+		fmt.Printf("%s : %v\n", key.String(), *value)
+	}
 }

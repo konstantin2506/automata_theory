@@ -12,6 +12,17 @@ func (n *OptionalNode) Type() NodeT {
 	return Optional
 }
 
-func (n OptionalNode) String() string {
+func (n *OptionalNode) String() string {
 	return "Optional"
+}
+
+func (n *OptionalNode) CalcNullable(specMap map[Node]*NodeSpec) bool {
+	n.child.CalcNullable(specMap)
+	return SetNullable(n, true, specMap)
+}
+
+func (n *OptionalNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
+	res := n.child.CalcFirst(specMap, charNums)
+	specMap[n].First = res
+	return res
 }

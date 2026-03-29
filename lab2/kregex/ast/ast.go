@@ -12,11 +12,9 @@ type Ast struct {
 	root Node
 }
 
-// "(ab(c?)...)"
-//"abc(lq+)*"
-//[a b c l]
-//+ -> [+node]
-//q ->
+func (ast *Ast) GetRoot() Node {
+	return ast.root
+}
 
 func BuildAst(str string) (Ast, error) {
 	str = fmt.Sprintf("(%s)", str)
@@ -45,7 +43,7 @@ func BuildAst(str string) (Ast, error) {
 				ns.Push(&KleeneNode{})
 				i += 2
 			} else {
-				ns.Push(&CharNode{ch})
+				ns.Push(&CharNode{ch, 0})
 			}
 		case '{':
 			start := i
@@ -68,7 +66,7 @@ func BuildAst(str string) (Ast, error) {
 			if i > len(str)-2 || str[i+2] != '%' {
 				return Ast{}, fmt.Errorf("incorrect escape symbol usage, pos: %d", i)
 			}
-			ns.Push(&CharNode{str[i+1]})
+			ns.Push(&CharNode{str[i+1], 0})
 			i += 2
 		case '<':
 			if i == 0 || str[i-1] != '(' {
@@ -89,7 +87,7 @@ func BuildAst(str string) (Ast, error) {
 			return Ast{}, fmt.Errorf("'>' does not have a paired '<'")
 
 		default:
-			ns.Push(&CharNode{ch})
+			ns.Push(&CharNode{ch, 0})
 		}
 	}
 
@@ -129,6 +127,10 @@ func (ast *Ast) TraverseRLR(str string, depth int, delim byte, depthString strin
 		}
 	}
 	return str
+}
+
+func NewSubAst(root Node) Ast {
+	return Ast{root}
 }
 
 func HandleFirstPriorityOps(ns *NodeStack) (NodeStack, Node) {

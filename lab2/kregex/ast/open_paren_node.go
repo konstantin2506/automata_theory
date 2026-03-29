@@ -11,5 +11,13 @@ func (n *OpenParenNode) Type() NodeT {
 }
 
 func (n *OpenParenNode) String() string {
-	return "( - node (wtf!!!)"
+	panic("String() : (-node (wtf!!!)")
+}
+
+func (n *OpenParenNode) CalcNullable(specMap map[Node]*NodeSpec) bool {
+	panic("Open Paren in 'correct' ast")
+}
+
+func (n *OpenParenNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
+	panic("Open Paren in 'correct ast")
 }

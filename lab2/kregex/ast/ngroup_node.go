@@ -20,3 +20,14 @@ func (n *NamedGroupNode) Type() NodeT {
 func (n *NamedGroupNode) String() string {
 	return fmt.Sprintf("Named_group[%s]", n.name)
 }
+
+func (n *NamedGroupNode) CalcNullable(specMap map[Node]*NodeSpec) bool {
+	res := n.child.CalcNullable(specMap)
+	return SetNullable(n, res, specMap)
+}
+
+func (n *NamedGroupNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
+	res := n.child.CalcFirst(specMap, charNums)
+	specMap[n].First = res
+	return res
+}
