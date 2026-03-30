@@ -99,6 +99,7 @@ func BuildAst(str string) (Ast, error) {
 
 func HandleParens(ns NodeStack) NodeStack {
 	concatStack, gname := HandleFirstPriorityOps(&ns)
+
 	orNode := ConcatinateNodes(&concatStack)
 	HandleLastNode(&ns, &concatStack, gname, orNode)
 	return ns
@@ -190,13 +191,13 @@ func HandleFirstPriorityOps(ns *NodeStack) (NodeStack, Node) {
 
 func ConcatinateNodes(concatStack *NodeStack) OrNode {
 	orNode := OrNode{}
-	for concatStack.Size() != 1 { // пытаемся конкатенировать, добавляем склеенные кусочки в стек для or
+	for concatStack.Size() != 1 {
 		current := concatStack.Top()
 		concatStack.Pop()
 		right := concatStack.Top()
 		concatStack.Pop()
 		newChildren := []Node{}
-		if right.Type() == Or {
+		if right.Type() == Or && !concatStack.isEmpty() {
 			orNode.childs = append(orNode.childs, current)
 			if len(right.Children()) != 0 {
 				orNode.childs = append(orNode.childs, right)

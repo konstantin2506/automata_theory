@@ -18,8 +18,8 @@ func TestAstStructure(t *testing.T) {
 		},
 		{
 			name:     "basic or",
-			input:    "a|b|c",
-			expected: "Or a b c",
+			input:    "(a|c)",
+			expected: "Or a c",
 		},
 		{
 			name:     "basic optional",
@@ -62,9 +62,9 @@ func TestAstStructure(t *testing.T) {
 			expected: "Concat Optional a b",
 		},
 		{
-			name:     "a|(bc)",
-			input:    "a|(bc)",
-			expected: "Or a Concat b c",
+			name:     "ab(b|c)",
+			input:    "ab(b|c)",
+			expected: "Concat a b Or b c",
 		},
 		{
 			name:     "a|b...",

@@ -4,9 +4,6 @@ type Node interface {
 	Children() []Node
 	Type() NodeT
 	String() string
-	CalcNullable(specMap map[Node]*NodeSpec) bool
-	CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int) []int
-	// CalcLast()
 }
 
 type (

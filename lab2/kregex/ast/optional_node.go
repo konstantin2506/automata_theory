@@ -17,12 +17,18 @@ func (n *OptionalNode) String() string {
 }
 
 func (n *OptionalNode) CalcNullable(specMap map[Node]*NodeSpec) bool {
-	n.child.CalcNullable(specMap)
+	n.child.(GLNode).CalcNullable(specMap)
 	return SetNullable(n, true, specMap)
 }
 
 func (n *OptionalNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
-	res := n.child.CalcFirst(specMap, charNums)
+	res := n.child.(GLNode).CalcFirst(specMap, charNums)
 	specMap[n].First = res
+	return res
+}
+
+func (n *OptionalNode) CalcLast(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
+	res := n.child.(GLNode).CalcLast(specMap, charNums)
+	specMap[n].Last = res
 	return res
 }

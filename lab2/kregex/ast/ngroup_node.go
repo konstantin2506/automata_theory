@@ -22,12 +22,18 @@ func (n *NamedGroupNode) String() string {
 }
 
 func (n *NamedGroupNode) CalcNullable(specMap map[Node]*NodeSpec) bool {
-	res := n.child.CalcNullable(specMap)
+	res := n.child.(GLNode).CalcNullable(specMap)
 	return SetNullable(n, res, specMap)
 }
 
 func (n *NamedGroupNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
-	res := n.child.CalcFirst(specMap, charNums)
+	res := n.child.(GLNode).CalcFirst(specMap, charNums)
+	specMap[n].First = res
+	return res
+}
+
+func (n *NamedGroupNode) CalcLast(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
+	res := n.child.(GLNode).CalcLast(specMap, charNums)
 	specMap[n].First = res
 	return res
 }

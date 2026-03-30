@@ -23,7 +23,7 @@ func (n *RepeatNode) CalcNullable(specMap map[Node]*NodeSpec) bool {
 	if n.count == 0 {
 		return SetNullable(n, true, specMap)
 	}
-	res := n.child.CalcNullable(specMap)
+	res := n.child.(GLNode).CalcNullable(specMap)
 	return SetNullable(n, res, specMap)
 }
 
@@ -31,7 +31,16 @@ func (n *RepeatNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int
 	if n.count == 0 {
 		return []int{}
 	}
-	res := n.child.CalcFirst(specMap, charNums)
+	res := n.child.(GLNode).CalcFirst(specMap, charNums)
 	specMap[n].First = res
+	return res
+}
+
+func (n *RepeatNode) CalcLast(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
+	if n.count == 0 {
+		return []int{}
+	}
+	res := n.child.(GLNode).CalcLast(specMap, charNums)
+	specMap[n].Last = res
 	return res
 }

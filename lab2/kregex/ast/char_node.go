@@ -27,3 +27,10 @@ func (n *CharNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node]int) 
 	specMap[n].First = res
 	return res
 }
+
+func (n *CharNode) CalcLast(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
+	res := []int{}
+	res = append(res, charNums[n])
+	specMap[n].Last = res
+	return res
+}

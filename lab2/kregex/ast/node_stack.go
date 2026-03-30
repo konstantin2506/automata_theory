@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 type NodeStack struct {
 	data []Node
 }
@@ -26,4 +28,12 @@ func (s *NodeStack) Top() Node {
 
 func (s *NodeStack) Size() int {
 	return len(s.data)
+}
+
+func (s *NodeStack) Print() {
+	fmt.Printf("[")
+	for _, x := range s.data {
+		fmt.Printf("%s, ", x.String())
+	}
+	fmt.Printf("]\n")
 }

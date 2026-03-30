@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	ast "kregex/kregex/ast"
-	dfa "kregex/kregex/dfa"
 )
 
 func main() {
-	str := "(a|b)ba?"
+	str := "(a|b)(c|d)"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
 	tree, err := ast.BuildAst(str)
@@ -18,11 +17,17 @@ func main() {
 	}
 	tree.Print(1)
 	specMap := ast.NewNodeSpecMap()
-	_, charNums := dfa.MarkChars(tree)
+	_, charNums := ast.MarkChars(tree)
 
-	dfa.ComputeNullable(&tree, specMap)
-	dfa.ComputeFirst(&tree, specMap, charNums)
-	for key, value := range specMap {
+	ast.ComputeNullable(&tree, specMap)
+	ast.ComputeFirst(&tree, specMap, charNums)
+	ast.ComputeLast(&tree, specMap, charNums)
+	/*for key, value := range specMap {
 		fmt.Printf("%s : %v\n", key.String(), *value)
+	}*/
+
+	followMap := ast.ComputeFollow(specMap)
+	for key, value := range followMap {
+		fmt.Printf("Follow[%d] = %v\n", key, value)
 	}
 }
