@@ -99,7 +99,9 @@ func BuildAst(str string) (Ast, error) {
 
 func HandleParens(ns NodeStack) NodeStack {
 	concatStack, gname := HandleFirstPriorityOps(&ns)
-
+	//if concatStack.isEmpty() {
+	//	return ns
+	//}
 	orNode := ConcatinateNodes(&concatStack)
 	HandleLastNode(&ns, &concatStack, gname, orNode)
 	return ns
@@ -181,12 +183,55 @@ func HandleFirstPriorityOps(ns *NodeStack) (NodeStack, Node) {
 			}
 			child := ns.Top()
 			ns.Pop()
-			current.(*RepeatNode).child = child
-			concatStack.Push(current)
+			rnode := current.(*RepeatNode)
+			if rnode.count == 0 {
+				panic("zero repeat not allowed")
+			}
+			unwrapped := &ConcatNode{}
+			for i := 0; i < int(rnode.count); i++ {
+				unwrapped.children = append(unwrapped.children, cloneSubtree(child))
+			}
+			concatStack.Push(unwrapped)
 		}
 	}
 	ns.Pop()
 	return concatStack, gname
+}
+
+func cloneSubtree(root Node) Node {
+	switch n := root.(type) {
+	case *CharNode:
+		return &CharNode{char: n.char, number: 0}
+
+	case *ConcatNode:
+		children := make([]Node, len(n.children))
+		for i, child := range n.children {
+			children[i] = cloneSubtree(child)
+		}
+		return &ConcatNode{children: children}
+
+	case *OrNode:
+		childs := make([]Node, len(n.childs))
+		for i, child := range n.childs {
+			childs[i] = cloneSubtree(child)
+		}
+		return &OrNode{childs: childs}
+
+	case *KleeneNode:
+		return &KleeneNode{child: cloneSubtree(n.child)}
+
+	case *OptionalNode:
+		return &OptionalNode{child: cloneSubtree(n.child)}
+
+	case *NamedGroupNode:
+		return &NamedGroupNode{
+			child: cloneSubtree(n.child),
+			name:  n.name,
+		}
+
+	default:
+		return root
+	}
 }
 
 func ConcatinateNodes(concatStack *NodeStack) OrNode {

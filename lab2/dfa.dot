@@ -1,0 +1,34 @@
+digraph DFA {
+  rankdir=LR;
+  node [shape=circle];
+
+  start [shape=point];
+  start -> S0;
+
+  S0 [label="S0\n"];
+  S1 [label="S1\n"];
+  S2 [label="S2\n"];
+  S3 [label="S3\n"];
+  S4 [label="S4\n"];
+  S5 [label="S5\n"];
+  S6 [label="S6\n"];
+  S7 [label="S7\n"];
+  S8 [label="S8\n"];
+  S9 [label="S9\n"];
+  S10 [label="S10\n"];
+  S11 [label="S11\n"];
+  S12 [label="S12\n", peripheries=2];
+
+  S0 -> S1 [label="a"];
+  S1 -> S2 [label="b"];
+  S2 -> S3 [label="o"];
+  S3 -> S4 [label="b"];
+  S4 -> S5 [label="u"];
+  S5 -> S6 [label="s"];
+  S6 -> S7 [label="a"];
+  S7 -> S8 [label="b"];
+  S8 -> S9 [label="o"];
+  S9 -> S10 [label="b"];
+  S10 -> S11 [label="u"];
+  S11 -> S12 [label="s"];
+}
