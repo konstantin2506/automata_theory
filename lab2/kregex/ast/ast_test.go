@@ -62,9 +62,9 @@ func TestAstStructure(t *testing.T) {
 			expected: "Concat Optional a b",
 		},
 		{
-			name:     "ab(b|c)",
-			input:    "ab(b|c)",
-			expected: "Concat a b Or b c",
+			name:     "ab(b|c)b",
+			input:    "ab(b|c)b",
+			expected: "Concat a b Or b c b",
 		},
 		{
 			name:     "a|b...",

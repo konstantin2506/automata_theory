@@ -124,7 +124,7 @@ func ComputeFollow(specMap map[Node]*NodeSpec) FollowMap {
 	follow := FollowMap{}
 
 	for node := range specMap {
-		switch n := node.(type) {
+		switch node.(type) {
 		case *ConcatNode:
 			children := node.Children()
 			for i := 0; i < len(children)-1; i++ {
@@ -139,19 +139,6 @@ func ComputeFollow(specMap map[Node]*NodeSpec) FollowMap {
 
 			for _, pos := range specMap[child].Last {
 				follow[pos] = lo.Union(follow[pos], specMap[child].First)
-			}
-		case *RepeatNode:
-			count := int(n.count)
-			if count > 1 {
-				child := node.Children()[0]
-				childSpec := specMap[child]
-
-				// Создаём связи между последовательными повторениями
-				for i := 0; i < count-1; i++ {
-					for _, pos := range childSpec.Last {
-						follow[pos] = lo.Union(follow[pos], childSpec.First)
-					}
-				}
 			}
 		}
 	}
@@ -291,11 +278,11 @@ func (dfa *DFA) String() string {
 	builder.WriteString("DFA:\n")
 
 	for _, state := range dfa.States {
-		builder.WriteString(fmt.Sprintf("State %d: positions=%v, accepting=%v\n",
-			state.ID, state.Positions, state.Accepting))
+		fmt.Fprintf(&builder, "State %d: positions=%v, accepting=%v\n",
+			state.ID, state.Positions, state.Accepting)
 
 		for char, targetID := range state.Transitions {
-			builder.WriteString(fmt.Sprintf("  --[%c]--> State %d\n", char, targetID))
+			fmt.Fprintf(&builder, "  --[%c]--> State %d\n", char, targetID)
 		}
 	}
 
@@ -311,7 +298,7 @@ func (dfa *DFA) GraphVizString() string {
 
 	// Начальная точка
 	builder.WriteString("  start [shape=point];\n")
-	builder.WriteString(fmt.Sprintf("  start -> S%d;\n\n", dfa.StartState))
+	fmt.Fprintf(&builder, "  start -> S%d;\n\n", dfa.StartState)
 
 	// Состояния
 	for _, state := range dfa.States {
@@ -320,8 +307,8 @@ func (dfa *DFA) GraphVizString() string {
 			shape = ", peripheries=2"
 		}
 		label := fmt.Sprintf("S%d\\n", state.ID)
-		builder.WriteString(fmt.Sprintf("  S%d [label=\"%s\"%s];\n",
-			state.ID, label, shape))
+		fmt.Fprintf(&builder, "  S%d [label=\"%s\"%s];\n",
+			state.ID, label, shape)
 	}
 
 	builder.WriteString("\n")
@@ -330,13 +317,14 @@ func (dfa *DFA) GraphVizString() string {
 	for _, state := range dfa.States {
 		for char, targetID := range state.Transitions {
 			charStr := string(char)
-			if char == '"' {
+			switch char {
+			case '"':
 				charStr = "\\\""
-			} else if char == '\\' {
+			case '\\':
 				charStr = "\\\\"
 			}
-			builder.WriteString(fmt.Sprintf("  S%d -> S%d [label=\"%s\"];\n",
-				state.ID, targetID, charStr))
+			fmt.Fprintf(&builder, "  S%d -> S%d [label=\"%s\"];\n",
+				state.ID, targetID, charStr)
 		}
 	}
 
@@ -344,7 +332,7 @@ func (dfa *DFA) GraphVizString() string {
 	return builder.String()
 }
 
-func positionsToString(positions []int) string {
+/*func positionsToString(positions []int) string {
 	if len(positions) == 0 {
 		return "{}"
 	}
@@ -353,7 +341,7 @@ func positionsToString(positions []int) string {
 		strs[i] = strconv.Itoa(pos)
 	}
 	return "{" + strings.Join(strs, ",") + "}"
-}
+}*/
 
 func (dfa *DFA) SaveGraphViz(filename string) error {
 	return os.WriteFile(filename, []byte(dfa.GraphVizString()), 0o644)

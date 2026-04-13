@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "(abobus){2}"
+	str := "(((a|b)(a|b)...)d){2}|(((a|b)(a|b)...)d){3}"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
 	tree, err := ast.BuildAst(str)

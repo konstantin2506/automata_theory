@@ -6,6 +6,7 @@ import (
 
 type OrNode struct {
 	childs []Node
+	inner  bool
 }
 
 func (n *OrNode) Children() []Node {

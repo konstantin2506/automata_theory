@@ -242,7 +242,7 @@ func ConcatinateNodes(concatStack *NodeStack) OrNode {
 		right := concatStack.Top()
 		concatStack.Pop()
 		newChildren := []Node{}
-		if right.Type() == Or && !concatStack.isEmpty() {
+		if right.Type() == Or && !concatStack.isEmpty() && !right.(*OrNode).inner {
 			orNode.childs = append(orNode.childs, current)
 			if len(right.Children()) != 0 {
 				orNode.childs = append(orNode.childs, right)
@@ -257,6 +257,7 @@ func ConcatinateNodes(concatStack *NodeStack) OrNode {
 			concatStack.Push(&ConcatNode{newChildren})
 		}
 	}
+	orNode.inner = true
 	return orNode
 }
 
