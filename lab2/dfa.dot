@@ -9,32 +9,11 @@ digraph DFA {
   S1 [label="S1\n"];
   S2 [label="S2\n"];
   S3 [label="S3\n"];
-  S4 [label="S4\n"];
-  S5 [label="S5\n"];
-  S6 [label="S6\n", peripheries=2];
-  S7 [label="S7\n"];
-  S8 [label="S8\n"];
-  S9 [label="S9\n", peripheries=2];
+  S4 [label="S4\n", peripheries=2];
 
   S0 -> S1 [label="a"];
-  S0 -> S1 [label="b"];
-  S1 -> S2 [label="a"];
-  S1 -> S2 [label="b"];
-  S2 -> S3 [label="d"];
-  S2 -> S2 [label="a"];
-  S2 -> S2 [label="b"];
-  S3 -> S4 [label="a"];
-  S3 -> S4 [label="b"];
-  S4 -> S5 [label="a"];
-  S4 -> S5 [label="b"];
-  S5 -> S5 [label="a"];
-  S5 -> S5 [label="b"];
-  S5 -> S6 [label="d"];
-  S6 -> S7 [label="b"];
-  S6 -> S7 [label="a"];
-  S7 -> S8 [label="a"];
-  S7 -> S8 [label="b"];
-  S8 -> S8 [label="a"];
-  S8 -> S8 [label="b"];
-  S8 -> S9 [label="d"];
+  S0 -> S2 [label="c"];
+  S1 -> S1 [label="a"];
+  S2 -> S3 [label="c"];
+  S3 -> S4 [label="c"];
 }

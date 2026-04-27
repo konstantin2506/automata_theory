@@ -4,6 +4,7 @@ package ast
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -17,6 +18,9 @@ func (ast *Ast) GetRoot() Node {
 }
 
 func BuildAst(str string) (Ast, error) {
+	if len(str) == 0 {
+		return Ast{nil}, nil
+	}
 	str = fmt.Sprintf("(%s)", str)
 	ns := NodeStack{}
 
@@ -113,6 +117,47 @@ func (ast *Ast) Print(depth int) {
 
 func (ast *Ast) TraverseRLRSpace() string {
 	return ast.TraverseRLR("", 1, ' ', "")
+}
+
+func (ast *Ast) SaveToDot(filename string) error {
+	dot := ast.ToGraphviz()
+	return os.WriteFile(filename, []byte(dot), 0644)
+}
+
+func (ast *Ast) ToGraphviz() string {
+	var sb strings.Builder
+	counter := 0
+
+	sb.WriteString("digraph AST {\n")
+
+	ast.writeNodeGraphviz(ast.root, -1, &counter, &sb)
+
+	sb.WriteString("}\n")
+	return sb.String()
+}
+
+func (ast *Ast) writeNodeGraphviz(node Node, parentID int, counter *int, sb *strings.Builder) int {
+	if node == nil {
+		return -1
+	}
+
+	currentID := *counter
+	*counter++
+
+	label := strings.ReplaceAll(node.String(), "\"", "\\\"")
+	fmt.Fprintf(sb, "  node%d [label=\"%s\"];\n", currentID, label)
+
+	if parentID >= 0 {
+		fmt.Fprintf(sb, "  node%d -> node%d;\n", parentID, currentID)
+	}
+
+	for _, child := range node.Children() {
+		if child != nil {
+			ast.writeNodeGraphviz(child, currentID, counter, sb)
+		}
+	}
+
+	return currentID
 }
 
 func (ast *Ast) TraverseRLR(str string, depth int, delim byte, depthString string) string {

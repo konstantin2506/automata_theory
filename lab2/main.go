@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "(((a|b)(a|b)...)d){2}|(((a|b)(a|b)...)d){3}"
+	str := "(<A>a...)(<B>b?)(<C>ccc)"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
 	tree, err := ast.BuildAst(str)
@@ -15,6 +15,9 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	nfa := ast.BuildFromAst(tree.GetRoot())
+	nfa.SaveToDot("nfa.dot")
+	tree.SaveToDot("ast.dot")
 	specMap := ast.NewNodeSpecMap()
 	chars, charNums := ast.MarkChars(&tree)
 	tree.Print(1)
@@ -39,4 +42,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	toSearch := "aaaaaaaaaaaaaaaaaccc"
+	ok, groups := nfa.Search(toSearch)
+	fmt.Printf("Str: '%s' - res=%t, groups = %v\n", toSearch, ok, groups)
+
 }

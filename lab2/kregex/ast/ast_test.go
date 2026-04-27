@@ -91,7 +91,7 @@ func TestAstStructure(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ast, err := BuildAst(tt.input)
-			if err != nil {
+			if err != nil || ast.GetRoot() == nil {
 				if tt.expected != "FAIL" {
 					t.Errorf("BuildAst() error = %v", err)
 				}

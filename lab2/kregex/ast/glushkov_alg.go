@@ -147,7 +147,7 @@ func ComputeFollow(specMap map[Node]*NodeSpec) FollowMap {
 
 func BuildDFA(root Node, follow FollowMap, first FirstMap, last LastMap,
 	chars []byte, charNums map[Node]int, specMap map[Node]*NodeSpec,
-) *DFA {
+) DFA {
 	// 1. Получаем начальное состояние из first корня
 	rootFirst := specMap[root].First
 	// Сортируем позиции для детерминизма
@@ -240,7 +240,7 @@ func BuildDFA(root Node, follow FollowMap, first FirstMap, last LastMap,
 		}
 	}
 
-	return &DFA{
+	return DFA{
 		States:     dfaStates,
 		StartState: 0,
 		Chars:      chars,
