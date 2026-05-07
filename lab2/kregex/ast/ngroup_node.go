@@ -34,6 +34,6 @@ func (n *NamedGroupNode) CalcFirst(specMap map[Node]*NodeSpec, charNums map[Node
 
 func (n *NamedGroupNode) CalcLast(specMap map[Node]*NodeSpec, charNums map[Node]int) []int {
 	res := n.child.(GLNode).CalcLast(specMap, charNums)
-	specMap[n].First = res
+	specMap[n].Last = res
 	return res
 }

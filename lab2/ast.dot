@@ -1,25 +1,5 @@
 digraph AST {
-  node0 [label="Concat"];
-  node1 [label="Named_group[A]"];
+  node0 [label="Kleene"];
+  node1 [label="a"];
   node0 -> node1;
-  node2 [label="Kleene"];
-  node1 -> node2;
-  node3 [label="a"];
-  node2 -> node3;
-  node4 [label="Named_group[B]"];
-  node0 -> node4;
-  node5 [label="Optional"];
-  node4 -> node5;
-  node6 [label="b"];
-  node5 -> node6;
-  node7 [label="Named_group[C]"];
-  node0 -> node7;
-  node8 [label="Concat"];
-  node7 -> node8;
-  node9 [label="c"];
-  node8 -> node9;
-  node10 [label="c"];
-  node8 -> node10;
-  node11 [label="c"];
-  node8 -> node11;
 }

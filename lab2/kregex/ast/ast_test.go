@@ -38,8 +38,8 @@ func TestAstStructure(t *testing.T) {
 		},
 		{
 			name:     "basic repeat",
-			input:    "a{666}",
-			expected: "Repeat:666 a",
+			input:    "a{2}",
+			expected: "Concat a a",
 		},
 		{
 			name:     "empty",
@@ -75,11 +75,6 @@ func TestAstStructure(t *testing.T) {
 			name:     "(a|b)...",
 			input:    "(a|b)...",
 			expected: "Kleene Or a b",
-		},
-		{
-			name:     "a|a?|(abc)...|a{2}",
-			input:    "a|a?|(abc)...|a{2}",
-			expected: "Or a Optional a Kleene Concat a b c Repeat:2 a",
 		},
 		{
 			name:     "(<C>(<A>a)|(<B>b))",

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "(<A>a...)(<B>b?)(<C>ccc)"
+	str := "a..."
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
 	tree, err := ast.BuildAst(str)
@@ -18,33 +18,18 @@ func main() {
 	nfa := ast.BuildFromAst(tree.GetRoot())
 	nfa.SaveToDot("nfa.dot")
 	tree.SaveToDot("ast.dot")
-	specMap := ast.NewNodeSpecMap()
-	chars, charNums := ast.MarkChars(&tree)
 	tree.Print(1)
 
-	ast.ComputeNullable(&tree, specMap, charNums)
-	first := ast.ComputeFirst(&tree, specMap, charNums)
-	last := ast.ComputeLast(&tree, specMap, charNums)
-
-	follow := ast.ComputeFollow(specMap)
-
-	for node, spec := range specMap {
-		fmt.Println(node.String(), spec.First, spec.Last)
-	}
-	fmt.Println()
-	for x, follows := range follow {
-		fmt.Println(x, follows)
-	}
-	dfa := ast.BuildDFA(tree.GetRoot(), follow, first, last,
-		chars, charNums, specMap)
-	fmt.Println(dfa.String())
-	err = dfa.SaveGraphViz("dfa.dot")
+	dfa := ast.NewDfa(tree)
+	err = dfa.SaveToDot("dfa.dot")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	toSearch := "aaaaaaaaaaaaaaaaaccc"
+	toSearch := ""
 	ok, groups := nfa.Search(toSearch)
-	fmt.Printf("Str: '%s' - res=%t, groups = %v\n", toSearch, ok, groups)
+	fmt.Printf("Str: '%s' - resNFA=%t, groups = %v\n", toSearch, ok, groups)
+	ok = dfa.Search(toSearch)
+	fmt.Printf("Str: '%s' - resDFA=%t\n", toSearch, ok)
 
 }

@@ -154,7 +154,6 @@ func BuildFromAst(root Node) Nfa {
 	case *CharNode:
 		return buildCharNfa(root.char)
 	case *NamedGroupNode:
-		fmt.Println(root.name)
 		return buildNamedGroup(BuildFromAst(root.child), root.name)
 	case *KleeneNode:
 		return buildKleeneNfa(BuildFromAst(root.Children()[0]))
@@ -202,9 +201,7 @@ func (nfa *Nfa) Search(str string) (bool, map[string]string) {
 		nextStates := map[*NfaNode]struct{}{}
 
 		for state := range currentStates {
-			fmt.Println(state.nodeType)
 			if state.nodeType == GroupStart {
-				fmt.Println("Start", state.groupName)
 				if _, ok := groupsIndexs[state.groupName]; !ok {
 					groupsIndexs[state.groupName] = make([]int, 2)
 					groupsIndexs[state.groupName][0] = -1
@@ -212,7 +209,6 @@ func (nfa *Nfa) Search(str string) (bool, map[string]string) {
 				}
 				groupsIndexs[state.groupName][0] = i
 			} else if state.nodeType == GroupEnd {
-				fmt.Println("End", state.groupName)
 				if _, ok := groupsIndexs[state.groupName]; !ok {
 					groupsIndexs[state.groupName] = make([]int, 2)
 					groupsIndexs[state.groupName][0] = -1
@@ -241,9 +237,7 @@ func (nfa *Nfa) Search(str string) (bool, map[string]string) {
 	}
 	ok := false
 	for state := range currentStates {
-		fmt.Println(state.nodeType)
 		if state.nodeType == GroupEnd && groupsIndexs[state.groupName][1] == -1 {
-			fmt.Println("End", state.groupName)
 			groupsIndexs[state.groupName][1] = len(str) - 1
 		}
 		if nfa.end == state {
@@ -251,7 +245,6 @@ func (nfa *Nfa) Search(str string) (bool, map[string]string) {
 		}
 	}
 	for groupName, indx := range groupsIndexs {
-		fmt.Println(indx)
 		if indx[0] != -1 && indx[1] != -1 && indx[0] <= indx[1] {
 			groups[groupName] = str[indx[0] : indx[1]+1]
 		}
