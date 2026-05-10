@@ -89,10 +89,13 @@ func NewDfa(tree Ast) Dfa {
 	dfa.addState(&firstState)
 	dfa.first = &firstState
 
+	states := map[positionKey]*DfaState{}
+	states[firstState.poskey] = &firstState
+
 	q := [][]int{}
 	q = append(q, specMap[tree.GetRoot()].First)
 
-	id := 2
+	id := 1
 	for len(q) > 0 {
 		currentState := q[0]
 		q = q[1:]
@@ -112,13 +115,15 @@ func NewDfa(tree Ast) Dfa {
 				newState.accepting = true
 			}
 			if ok := dfa.addState(&newState); ok {
-				q = append(q, union)
 				id++
+				states[newState.poskey] = &newState
+				q = append(q, union)
 			}
-			dfa.addTransition(createPositionKey(currentState), &newState, char)
+
+			dfa.addTransition(createPositionKey(currentState), states[newState.poskey], char)
 		}
 	}
-
+	fmt.Println(len(dfa.table))
 	return dfa
 }
 
@@ -190,6 +195,8 @@ func (dfa *Dfa) ToGraphviz() string {
 		label := ""
 		if state != nil {
 			label = fmt.Sprintf("S%d", state.id)
+		} else {
+			label = "S0"
 		}
 		fmt.Fprintf(&sb, "    \"%s\" [label=\"%s\", shape=%s];\n", key, label, shape)
 	}
