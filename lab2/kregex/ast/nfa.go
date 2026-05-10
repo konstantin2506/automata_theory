@@ -187,72 +187,75 @@ func (this *NfaNode) buildEpsilonClosure() map[*NfaNode]struct{} {
 
 }
 
-func (nfa *Nfa) Search(str string) (bool, map[string]string) {
+func (nfa *Nfa) Search(str string) (string, map[string]string) {
 	if nfa.start == nil && nfa.end == nil && str == "" {
-		return true, nil
+		return "", nil
 	}
-	currentStates := nfa.start.buildEpsilonClosure()
-	currentStates[nfa.start] = struct{}{}
-	groupsIndexs := map[string][]int{}
-	groups := map[string]string{}
 
-	for i := 0; i < len(str); i++ {
-		ch := str[i]
-		nextStates := map[*NfaNode]struct{}{}
+	for j := 0; j < len(str); j++ {
+		currentStates := nfa.start.buildEpsilonClosure()
+		currentStates[nfa.start] = struct{}{}
+		groupsIndexs := map[string][]int{}
 
-		for state := range currentStates {
-			if state.nodeType == GroupStart {
-				if _, ok := groupsIndexs[state.groupName]; !ok {
-					groupsIndexs[state.groupName] = make([]int, 2)
-					groupsIndexs[state.groupName][0] = -1
-					groupsIndexs[state.groupName][1] = -1
+		for i := j; i < len(str); i++ {
+			ch := str[i]
+			nextStates := map[*NfaNode]struct{}{}
+
+			for state := range currentStates {
+				if state.nodeType == GroupStart {
+					if _, ok := groupsIndexs[state.groupName]; !ok {
+						groupsIndexs[state.groupName] = make([]int, 2)
+						groupsIndexs[state.groupName][0] = -1
+						groupsIndexs[state.groupName][1] = -1
+					}
+					if groupsIndexs[state.groupName][0] == -1 {
+						groupsIndexs[state.groupName][0] = i
+					}
 				}
-				groupsIndexs[state.groupName][0] = i
-			} else if state.nodeType == GroupEnd {
-				if _, ok := groupsIndexs[state.groupName]; !ok {
-					groupsIndexs[state.groupName] = make([]int, 2)
-					groupsIndexs[state.groupName][0] = -1
-					groupsIndexs[state.groupName][1] = -1
-				}
-				groupsIndexs[state.groupName][1] = i - 1
 
-			}
-
-			for _, transition := range state.charTransitions {
-				if transition.char == ch {
-					nextStates[transition.dst] = struct{}{}
+				for _, transition := range state.charTransitions {
+					if transition.char == ch {
+						nextStates[transition.dst] = struct{}{}
+					}
 				}
 			}
-		}
 
-		clear(currentStates)
-		for nextState := range nextStates {
-			appendSetToFirst(currentStates, nextState.buildEpsilonClosure())
-			currentStates[nextState] = struct{}{}
-		}
+			clear(currentStates)
+			for nextState := range nextStates {
+				appendSetToFirst(currentStates, nextState.buildEpsilonClosure())
+				currentStates[nextState] = struct{}{}
+			}
 
-		if len(currentStates) == 0 {
-			return false, nil
+			for state := range currentStates {
+				if state.nodeType == GroupEnd {
+					if _, ok := groupsIndexs[state.groupName]; !ok {
+						groupsIndexs[state.groupName] = make([]int, 2)
+						groupsIndexs[state.groupName][0] = -1
+						groupsIndexs[state.groupName][1] = -1
+					}
+					if groupsIndexs[state.groupName][1] == -1 {
+						groupsIndexs[state.groupName][1] = i
+					}
+				}
+			}
+
+			if len(currentStates) == 0 {
+				break
+			}
+
+			if _, ok := currentStates[nfa.end]; ok {
+				groups := map[string]string{}
+				for groupName, idx := range groupsIndexs {
+					if idx[0] != -1 && idx[1] != -1 && idx[0] <= idx[1] {
+						groups[groupName] = str[idx[0] : idx[1]+1]
+					}
+				}
+				return str[j : i+1], groups
+			}
 		}
 	}
-	ok := false
-	for state := range currentStates {
-		if state.nodeType == GroupEnd && groupsIndexs[state.groupName][1] == -1 {
-			groupsIndexs[state.groupName][1] = len(str) - 1
-		}
-		if nfa.end == state {
-			ok = true
-		}
-	}
-	for groupName, indx := range groupsIndexs {
-		if indx[0] != -1 && indx[1] != -1 && indx[0] <= indx[1] {
-			groups[groupName] = str[indx[0] : indx[1]+1]
-		}
-	}
-	return ok, groups
-
+	return "", nil
 }
-
 func appendSetToFirst(first, second map[*NfaNode]struct{}) {
 	for key := range second {
 		_, ok := first[key]

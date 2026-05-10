@@ -12,8 +12,9 @@ import (
 
 type (
 	Dfa struct {
-		table  []map[byte]int
-		states []bool
+		table    []map[byte]int
+		states   []bool
+		alphabet []byte
 	}
 )
 
@@ -42,6 +43,9 @@ func (dfa *DfaDev) addState(state *DfaDevState) bool {
 func (dfa *Dfa) addState(accepting bool) {
 	dfa.table = append(dfa.table, make(map[byte]int))
 	dfa.states = append(dfa.states, accepting)
+}
+func (dfa *Dfa) StatesCount() int {
+	return len(dfa.states)
 }
 
 func (dfa *DfaDev) addTransition(fromKey positionKey, to *DfaDevState, char byte) {
@@ -82,7 +86,7 @@ func createAlphabet(chars []byte) []byte {
 
 func NewDfa(tree Ast) Dfa {
 	if tree.GetRoot() == nil {
-		return Dfa{nil, nil}
+		return Dfa{nil, nil, nil}
 	}
 	specMap := NewNodeSpecMap()
 	chars, charNums := MarkChars(&tree)
@@ -101,7 +105,7 @@ func NewDfa(tree Ast) Dfa {
 	}
 	dfaDev.addState(&firstState)
 
-	dfa := Dfa{table: []map[byte]int{}, states: []bool{}}
+	dfa := Dfa{table: []map[byte]int{}, states: []bool{}, alphabet: alphabet}
 	dfa.addState(firstState.accepting)
 
 	states := map[positionKey]*DfaDevState{}
@@ -147,32 +151,31 @@ func NewDfa(tree Ast) Dfa {
 }
 
 func (dfa *Dfa) Search(str string) string {
-	if dfa.table == nil && str == "" {
+	if dfa.table == nil {
+		return ""
+	}
+
+	if accepting := dfa.states[0]; accepting {
 		return ""
 	}
 
 	for i := range len(str) {
-		builder := strings.Builder{}
 		current := 0
 		for j := i; j < len(str); j++ {
 			char := str[j]
-			if next, ok := dfa.table[current][char]; ok {
-				builder.WriteByte(char)
-				if dfa.states[current] {
-					return builder.String()
-				}
-				current = next
-
+			next, ok := dfa.table[current][char]
+			if !ok {
+				break
 			}
-		}
-		if dfa.states[current] {
-			return builder.String()
+			current = next
+			if accepting := dfa.states[current]; accepting {
+				return str[i : j+1]
+			}
 		}
 	}
 
 	return ""
 }
-
 func (dfa *Dfa) ToGraphviz() string {
 	var sb strings.Builder
 	sb.WriteString("digraph DFA {\n")

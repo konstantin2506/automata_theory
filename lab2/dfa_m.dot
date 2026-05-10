@@ -17,9 +17,9 @@ digraph DFA {
     1 -> 2 [label="b"];
     2 -> 3 [label="c"];
     3 -> 4 [label="d"];
-    4 -> 5 [label="g"];
     4 -> 4 [label="e"];
     4 -> 6 [label="f"];
+    4 -> 5 [label="g"];
     5 -> 5 [label="g"];
     6 -> 5 [label="g"];
     6 -> 6 [label="f"];

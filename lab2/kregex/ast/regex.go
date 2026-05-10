@@ -26,17 +26,18 @@ func Compile(expr string) (Regex, error) {
 	if err != nil {
 		return Regex{}, err
 	}
-	dfa := NewDfa(regex.tree)
+	dfa := Minimize(NewDfa((regex.tree)))
+
 	regex.compiled = true
 	regex.dfa = dfa
 	return regex, nil
 }
 
-/*
 // if compiled uses dfa, else nfa
-func Search(str string, regex *Regex) bool {
-	found := false
+func Search(str string, regex *Regex) string {
+	var found string
 	switch regex.compiled {
+
 	case true:
 		found = regex.dfa.Search(str)
 	case false:
@@ -44,5 +45,5 @@ func Search(str string, regex *Regex) bool {
 	}
 	return found
 }
-*/
+
 //func SearchWithGroups(str string, regex *Regex) (map[int]string, bool)
