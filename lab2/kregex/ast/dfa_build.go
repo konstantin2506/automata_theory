@@ -10,28 +10,41 @@ import (
 	"github.com/samber/lo"
 )
 
-type Dfa struct {
-	table map[positionKey]map[byte]*DfaState
-	first *DfaState
-}
+type (
+	Dfa struct {
+		table  []map[byte]int
+		states []bool
+	}
+)
 
-type positionKey string
+type (
+	positionKey string
 
-type DfaState struct {
-	id        int
-	poskey    positionKey
-	accepting bool
-}
+	DfaDev struct {
+		table map[positionKey]map[byte]*DfaDevState
+	}
 
-func (dfa *Dfa) addState(state *DfaState) bool {
+	DfaDevState struct {
+		id        int
+		poskey    positionKey
+		accepting bool
+	}
+)
+
+func (dfa *DfaDev) addState(state *DfaDevState) bool {
 	if _, ok := dfa.table[state.poskey]; !ok {
-		dfa.table[state.poskey] = make(map[byte]*DfaState)
+		dfa.table[state.poskey] = make(map[byte]*DfaDevState)
 		return true
 	}
 	return false
 }
 
-func (dfa *Dfa) addTransition(fromKey positionKey, to *DfaState, char byte) {
+func (dfa *Dfa) addState(accepting bool) {
+	dfa.table = append(dfa.table, make(map[byte]int))
+	dfa.states = append(dfa.states, accepting)
+}
+
+func (dfa *DfaDev) addTransition(fromKey positionKey, to *DfaDevState, char byte) {
 	dfa.table[fromKey][char] = to
 }
 
@@ -45,8 +58,8 @@ func createPositionKey(positions []int) positionKey {
 	return pkey
 }
 
-func NewDfaState(id int, positions []int) DfaState {
-	return DfaState{
+func NewDfaDevState(id int, positions []int) DfaDevState {
+	return DfaDevState{
 		id:        id,
 		poskey:    createPositionKey(positions),
 		accepting: false,
@@ -81,15 +94,17 @@ func NewDfa(tree Ast) Dfa {
 	ComputeLast(&tree, specMap, charNums)
 	follow := ComputeFollow(specMap)
 
-	dfa := Dfa{table: make(map[positionKey]map[byte]*DfaState)}
-	firstState := NewDfaState(0, specMap[tree.GetRoot()].First)
+	dfaDev := DfaDev{table: make(map[positionKey]map[byte]*DfaDevState)}
+	firstState := NewDfaDevState(0, specMap[tree.GetRoot()].First)
 	if lo.Contains(specMap[tree.GetRoot()].First, len(chars)-1) {
 		firstState.accepting = true
 	}
-	dfa.addState(&firstState)
-	dfa.first = &firstState
+	dfaDev.addState(&firstState)
 
-	states := map[positionKey]*DfaState{}
+	dfa := Dfa{table: []map[byte]int{}, states: []bool{}}
+	dfa.addState(firstState.accepting)
+
+	states := map[positionKey]*DfaDevState{}
 	states[firstState.poskey] = &firstState
 
 	q := [][]int{}
@@ -99,6 +114,7 @@ func NewDfa(tree Ast) Dfa {
 	for len(q) > 0 {
 		currentState := q[0]
 		q = q[1:]
+		current := states[createPositionKey(currentState)]
 
 		for _, char := range alphabet {
 			union := []int{}
@@ -110,43 +126,46 @@ func NewDfa(tree Ast) Dfa {
 			if len(union) == 0 {
 				continue
 			}
-			newState := NewDfaState(id, union)
+			newState := NewDfaDevState(id, union)
 			if lo.Contains(union, len(chars)-1) { // '#'
 				newState.accepting = true
 			}
-			if ok := dfa.addState(&newState); ok {
-				id++
+			if ok := dfaDev.addState(&newState); ok {
+				dfa.addState(newState.accepting)
 				states[newState.poskey] = &newState
 				q = append(q, union)
+				id++
 			}
 
-			dfa.addTransition(createPositionKey(currentState), states[newState.poskey], char)
+			dfaDev.addTransition(current.poskey, states[newState.poskey], char)
+
+			dfa.table[current.id][char] = states[newState.poskey].id
+
 		}
 	}
-	fmt.Println(len(dfa.table))
 	return dfa
 }
 
 func (dfa *Dfa) Search(str string) string {
-	if dfa.first == nil && str == "" {
+	if dfa.table == nil && str == "" {
 		return ""
 	}
 
 	for i := range len(str) {
 		builder := strings.Builder{}
-		current := dfa.first
+		current := 0
 		for j := i; j < len(str); j++ {
 			char := str[j]
-			if next, ok := dfa.table[current.poskey][char]; ok {
+			if next, ok := dfa.table[current][char]; ok {
 				builder.WriteByte(char)
-				if current.accepting {
+				if dfa.states[current] {
 					return builder.String()
 				}
 				current = next
 
 			}
 		}
-		if current.accepting {
+		if dfa.states[current] {
 			return builder.String()
 		}
 	}
@@ -160,54 +179,18 @@ func (dfa *Dfa) ToGraphviz() string {
 	sb.WriteString("    rankdir=LR;\n\n")
 	sb.WriteString("    start [shape=none, label=\"\"];\n\n")
 
-	// Собираем все уникальные состояния из таблицы
-	allStates := map[positionKey]*DfaState{}
-	for fromKey, transitions := range dfa.table {
-		// fromKey может не быть значением ни в одном переходе
-		if _, ok := allStates[fromKey]; !ok {
-			allStates[fromKey] = nil // временно, уточним ниже
-		}
-		for _, to := range transitions {
-			allStates[to.poskey] = to
-		}
-	}
-
-	// Для fromKey, которые остались nil, ищем их среди значений
-	for fromKey := range dfa.table {
-		if allStates[fromKey] == nil {
-			for _, transitions := range dfa.table {
-				for _, to := range transitions {
-					if to.poskey == fromKey {
-						allStates[fromKey] = to
-						break
-					}
-				}
-			}
-		}
-	}
-
-	// Выводим узлы
-	for key, state := range allStates {
+	for id, accepting := range dfa.states {
 		shape := "circle"
-		if state != nil && state.accepting {
+		if accepting {
 			shape = "doublecircle"
 		}
-		label := ""
-		if state != nil {
-			label = fmt.Sprintf("S%d", state.id)
-		} else {
-			label = "S0"
-		}
-		fmt.Fprintf(&sb, "    \"%s\" [label=\"%s\", shape=%s];\n", key, label, shape)
+		fmt.Fprintf(&sb, "    %d [label=\"S%d\", shape=%s];\n", id, id, shape)
 	}
+	sb.WriteString("\n    start -> 0;\n\n")
 
-	// Входная стрелка
-	fmt.Fprintf(&sb, "\n    start -> \"%s\";\n\n", dfa.first.poskey)
-
-	// Переходы
-	for fromKey, transitions := range dfa.table {
+	for fromId, transitions := range dfa.table {
 		for char, to := range transitions {
-			fmt.Fprintf(&sb, "    \"%s\" -> \"%s\" [label=\"%c\"];\n", fromKey, to.poskey, char)
+			fmt.Fprintf(&sb, "    %d -> %d [label=\"%c\"];\n", fromId, to, char)
 		}
 	}
 
