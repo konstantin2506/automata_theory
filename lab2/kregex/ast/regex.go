@@ -2,7 +2,7 @@ package ast
 
 type Regex struct {
 	nfa      Nfa
-	dfa      DFA
+	dfa      Dfa
 	tree     Ast
 	compiled bool
 }
@@ -26,31 +26,23 @@ func Compile(expr string) (Regex, error) {
 	if err != nil {
 		return Regex{}, err
 	}
-	specMap := NewNodeSpecMap()
-	tree := regex.tree
-	chars, charNums := MarkChars(&tree)
-
-	ComputeNullable(&tree, specMap, charNums)
-	first := ComputeFirst(&tree, specMap, charNums)
-	last := ComputeLast(&tree, specMap, charNums)
-
-	follow := ComputeFollow(specMap)
-	dfa := BuildDFA(tree.GetRoot(), follow, first, last, chars, charNums, specMap)
+	dfa := NewDfa(regex.tree)
 	regex.compiled = true
 	regex.dfa = dfa
 	return regex, nil
 }
 
+/*
 // if compiled uses dfa, else nfa
 func Search(str string, regex *Regex) bool {
 	found := false
 	switch regex.compiled {
 	case true:
-		//_, found = regex.nfa.Search(str)
+		found = regex.dfa.Search(str)
 	case false:
-		//found = regex.nfa.Search(str)
+		found, _ = regex.nfa.Search(str)
 	}
 	return found
 }
-
+*/
 //func SearchWithGroups(str string, regex *Regex) (map[int]string, bool)

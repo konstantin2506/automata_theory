@@ -122,23 +122,31 @@ func NewDfa(tree Ast) Dfa {
 	return dfa
 }
 
-func (dfa *Dfa) Search(str string) bool {
+func (dfa *Dfa) Search(str string) string {
 	if dfa.first == nil && str == "" {
-		return true
+		return ""
 	}
-	current := dfa.first
+
 	for i := range len(str) {
-		char := str[i]
-		if next, ok := dfa.table[current.poskey][char]; ok {
-			current = next
-			continue
+		builder := strings.Builder{}
+		current := dfa.first
+		for j := i; j < len(str); j++ {
+			char := str[j]
+			if next, ok := dfa.table[current.poskey][char]; ok {
+				builder.WriteByte(char)
+				if current.accepting {
+					return builder.String()
+				}
+				current = next
+
+			}
 		}
-		return false
+		if current.accepting {
+			return builder.String()
+		}
 	}
-	if current.accepting {
-		return true
-	}
-	return false
+
+	return ""
 }
 
 func (dfa *Dfa) ToGraphviz() string {

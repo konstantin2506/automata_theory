@@ -3,9 +3,13 @@ digraph DFA {
 
     start [shape=none, label=""];
 
-    "1,2" [label="S2", shape=doublecircle];
+    "1,2" [label="", shape=circle];
+    "3,4,5,6,7" [label="S3", shape=doublecircle];
 
     start -> "1,2";
 
-    "1,2" -> "1,2" [label="a"];
+    "1,2" -> "3,4,5,6,7" [label="a"];
+    "1,2" -> "3,4,5,6,7" [label="b"];
+    "3,4,5,6,7" -> "3,4,5,6,7" [label="a"];
+    "3,4,5,6,7" -> "3,4,5,6,7" [label="b"];
 }

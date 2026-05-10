@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "a..."
+	str := "(a|b)((a|b)...){2}"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
 	tree, err := ast.BuildAst(str)
@@ -26,10 +26,10 @@ func main() {
 		fmt.Println(err)
 	}
 
-	toSearch := ""
+	toSearch := "baaa"
 	ok, groups := nfa.Search(toSearch)
 	fmt.Printf("Str: '%s' - resNFA=%t, groups = %v\n", toSearch, ok, groups)
-	ok = dfa.Search(toSearch)
-	fmt.Printf("Str: '%s' - resDFA=%t\n", toSearch, ok)
+	substr := dfa.Search(toSearch)
+	fmt.Printf("Str: '%s' - resDFA=%s\n", toSearch, substr)
 
 }
