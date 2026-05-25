@@ -6,246 +6,369 @@ import (
 
 func TestNfa_Search(t *testing.T) {
 	tests := []struct {
-		name string
-		rgex string
-		str  string
-		want bool
+		name       string
+		regex      string
+		str        string
+		wantMatch  string
+		wantGroups map[string]string
 	}{
 		{
-			name: "single char match",
-			rgex: "a",
-			str:  "a",
-			want: true,
+			name:      "один символ — точное совпадение",
+			regex:     "a",
+			str:       "a",
+			wantMatch: "a",
 		},
 		{
-			name: "single char no match",
-			rgex: "a",
-			str:  "b",
-			want: false,
+			name:      "один символ — нет совпадения",
+			regex:     "a",
+			str:       "b",
+			wantMatch: "",
 		},
 		{
-			name: "concat simple",
-			rgex: "ab",
-			str:  "ab",
-			want: true,
+			name:      "один символ — в середине строки",
+			regex:     "a",
+			str:       "bbabb",
+			wantMatch: "a",
 		},
 		{
-			name: "concat no match",
-			rgex: "ab",
-			str:  "ac",
-			want: false,
+			name:      "один символ — первое из нескольких",
+			regex:     "a",
+			str:       "babab",
+			wantMatch: "a",
+		},
+
+		{
+			name:      "конкатенация — точное совпадение",
+			regex:     "ab",
+			str:       "ab",
+			wantMatch: "ab",
 		},
 		{
-			name: "concat extra chars",
-			rgex: "ab",
-			str:  "abc",
-			want: false,
+			name:      "конкатенация — в середине",
+			regex:     "ab",
+			str:       "xxabxx",
+			wantMatch: "ab",
 		},
 		{
-			name: "concat substring",
-			rgex: "bc",
-			str:  "abcd",
-			want: false,
+			name:      "конкатенация — первое из нескольких",
+			regex:     "ab",
+			str:       "abxxab",
+			wantMatch: "ab",
 		},
 		{
-			name: "or first branch",
-			rgex: "a|b",
-			str:  "a",
-			want: true,
+			name:      "конкатенация — нет совпадения",
+			regex:     "ab",
+			str:       "axxb",
+			wantMatch: "",
 		},
 		{
-			name: "or second branch",
-			rgex: "a|b",
-			str:  "b",
-			want: true,
+			name:      "конкатенация — с наложением",
+			regex:     "aa",
+			str:       "aaa",
+			wantMatch: "aa",
 		},
 		{
-			name: "or no match",
-			rgex: "a|b",
-			str:  "c",
-			want: false,
+			name:      "конкатенация — три символа",
+			regex:     "abc",
+			str:       "xxabcxx",
+			wantMatch: "abc",
+		},
+
+		{
+			name:      "альтернатива — первая ветвь",
+			regex:     "a|b",
+			str:       "a",
+			wantMatch: "a",
 		},
 		{
-			name: "kleene zero",
-			rgex: "a...",
-			str:  "",
-			want: true,
+			name:      "альтернатива — вторая ветвь",
+			regex:     "a|b",
+			str:       "b",
+			wantMatch: "b",
 		},
 		{
-			name: "kleene one",
-			rgex: "a...",
-			str:  "a",
-			want: true,
+			name:      "альтернатива — первое вхождение",
+			regex:     "a|b",
+			str:       "ccbcca",
+			wantMatch: "b",
 		},
 		{
-			name: "kleene many",
-			rgex: "a...",
-			str:  "aaaa",
-			want: true,
+			name:      "альтернатива — нет совпадения",
+			regex:     "a|b",
+			str:       "ccc",
+			wantMatch: "",
 		},
 		{
-			name: "kleene no match",
-			rgex: "a...",
-			str:  "b",
-			want: false,
+			name:      "альтернатива — с конкатенацией",
+			regex:     "ab|cd",
+			str:       "xxcdxx",
+			wantMatch: "cd",
+		},
+
+		{
+			name:      "звезда — одно повторение",
+			regex:     "a...",
+			str:       "a",
+			wantMatch: "a",
 		},
 		{
-			name: "optional present",
-			rgex: "a?b",
-			str:  "ab",
-			want: true,
+			name:      "звезда — много повторений (жадная)",
+			regex:     "a...",
+			str:       "aaaab",
+			wantMatch: "aaaa",
 		},
 		{
-			name: "optional absent",
-			rgex: "a?b",
-			str:  "b",
-			want: true,
+			name:      "звезда — в середине строки",
+			regex:     "a...",
+			str:       "bbaaaccc",
+			wantMatch: "aaa",
 		},
 		{
-			name: "optional no match",
-			rgex: "a?b",
-			str:  "ac",
-			want: false,
+			name:      "звезда — ое вхождение",
+			regex:     "a...",
+			str:       "bbaaaaxxaaaa",
+			wantMatch: "aaaa",
 		},
 		{
-			name: "complex concat and kleene",
-			rgex: "ab...c",
-			str:  "ac",
-			want: true,
+			name:      "звезда с конкатенацией — жадная внутри",
+			regex:     "a...b",
+			str:       "aaabbb",
+			wantMatch: "aaab",
 		},
 		{
-			name: "complex concat and kleene 2",
-			rgex: "ab...c",
-			str:  "abbbbc",
-			want: true,
+			name:      "звезда с конкатенацией — минимальное",
+			regex:     "a...b",
+			str:       "ab",
+			wantMatch: "ab",
 		},
 		{
-			name: "complex concat and kleene 3",
-			rgex: "ab...c",
-			str:  "abc",
-			want: true,
+			name:      "звезда с конкатенацией — в середине",
+			regex:     "a...b",
+			str:       "xxaabxx",
+			wantMatch: "aab",
 		},
 		{
-			name: "complex concat and kleene no match",
-			rgex: "ab...c",
-			str:  "abbbbd",
-			want: false,
+			name:      "звезда с конкатенацией — несколько b",
+			regex:     "a...b...",
+			str:       "aabbb",
+			wantMatch: "aabbb",
 		},
 		{
-			name: "or with concat",
-			rgex: "ab|cd",
-			str:  "ab",
-			want: true,
+			name:      "звезда ab...",
+			regex:     "ab...",
+			str:       "xaabbbbfa",
+			wantMatch: "a",
+		},
+
+		{
+			name:      "опциональность — символ есть",
+			regex:     "a?b",
+			str:       "ab",
+			wantMatch: "ab",
 		},
 		{
-			name: "or with concat 2",
-			rgex: "ab|cd",
-			str:  "cd",
-			want: true,
+			name:      "опциональность — символа нет",
+			regex:     "a?b",
+			str:       "b",
+			wantMatch: "b",
 		},
 		{
-			name: "or with concat no match",
-			rgex: "ab|cd",
-			str:  "ac",
-			want: false,
+			name:      "опциональность — в середине строки",
+			regex:     "a?b",
+			str:       "xxbxx",
+			wantMatch: "b",
+		},
+
+		{
+			name:      "повтор — ровно 3",
+			regex:     "a{3}",
+			str:       "aaa",
+			wantMatch: "aaa",
 		},
 		{
-			name: "repeat exact",
-			rgex: "a{3}",
-			str:  "aaa",
-			want: true,
+			name:      "повтор — в середине",
+			regex:     "a{3}",
+			str:       "xxaaaxx",
+			wantMatch: "aaa",
 		},
 		{
-			name: "repeat too few",
-			rgex: "a{3}",
-			str:  "aa",
-			want: false,
+			name:      "повтор — больше чем нужно (жадно только 3)",
+			regex:     "a{3}",
+			str:       "aaaa",
+			wantMatch: "aaa",
 		},
 		{
-			name: "repeat too many",
-			rgex: "a{3}",
-			str:  "aaaa",
-			want: false,
+			name:      "повтор — с конкатенацией",
+			regex:     "a{2}b",
+			str:       "xaabx",
+			wantMatch: "aab",
+		},
+
+		{
+			name:      "группа — простая",
+			regex:     "(ab)",
+			str:       "ab",
+			wantMatch: "ab",
 		},
 		{
-			name: "repeat with concat",
-			rgex: "a{2}b",
-			str:  "aab",
-			want: true,
+			name:      "группа — с альтернативой",
+			regex:     "(a|b)c",
+			str:       "xacx",
+			wantMatch: "ac",
+		},
+
+		{
+			name:       "именованная группа — с альтернативой",
+			regex:      "(<A>a|b)c",
+			str:        "xacx",
+			wantMatch:  "ac",
+			wantGroups: map[string]string{"A": "a"},
 		},
 		{
-			name: "repeat with concat no match",
-			rgex: "a{2}b",
-			str:  "ab",
-			want: false,
+			name:       "именованная группа — захват a*",
+			regex:      "(<A>a...)b",
+			str:        "aaab",
+			wantMatch:  "aaab",
+			wantGroups: map[string]string{"A": "aaa"},
 		},
 		{
-			name: "escaped special char",
-			rgex: "%(%",
-			str:  "(",
-			want: true,
+			name:       "именованная группа — с опциональностью",
+			regex:      "(<A>a?)b",
+			str:        "ab",
+			wantMatch:  "ab",
+			wantGroups: map[string]string{"A": "a"},
 		},
 		{
-			name: "escaped special char 2",
-			rgex: "%)%",
-			str:  ")",
-			want: true,
+			name:       "treesh",
+			regex:      "(<A>a...)...|(<BC>b...c?)",
+			str:        "qqqbbbbbbccaaaaaaaac",
+			wantMatch:  "bbbbbbc",
+			wantGroups: map[string]string{"BC": "bbbbbbc"},
 		},
 		{
-			name: "nested groups simple",
-			rgex: "(ab)",
-			str:  "ab",
-			want: true,
+			name:       "woooow case",
+			regex:      "(<A>(<AA>a?|b?))",
+			str:        "cccaabbcc",
+			wantMatch:  "a",
+			wantGroups: map[string]string{"A": "a", "AA": "a"},
 		},
 		{
-			name: "named group",
-			rgex: "(<name>ab)",
-			str:  "ab",
-			want: true,
+			name:      "именованная группа — нет совпадения",
+			regex:     "(<A>abc)",
+			str:       "xxabxx",
+			wantMatch: "",
+		},
+
+		{
+			name:      "сложное — (a|b)...c",
+			regex:     "(a|b)...c",
+			str:       "aaac",
+			wantMatch: "aaac",
 		},
 		{
-			name: "empty string always matches",
-			rgex: "",
-			str:  "",
-			want: true,
+			name:      "сложное — (a|b)...c в середине",
+			regex:     "(a|b)...c",
+			str:       "xxabbcxx",
+			wantMatch: "abbc",
 		},
 		{
-			name: "complex expression",
-			rgex: "(a|b)...c?d",
-			str:  "aaaacd",
-			want: true,
+			name:      "сложное — a...b|c...d",
+			regex:     "a...b|c...d",
+			str:       "xxcccdxx",
+			wantMatch: "cccd",
 		},
 		{
-			name: "complex expression 2",
-			rgex: "(a|b)...c?d",
-			str:  "bd",
-			want: true,
+			name:      "сложное — вложенная звезда",
+			regex:     "(a...b)...",
+			str:       "aababx",
+			wantMatch: "aabab",
 		},
 		{
-			name: "complex expression 3",
-			rgex: "(a|b)...c?d",
-			str:  "bbbbcd",
-			want: true,
+			name:      "сложное — все вместе",
+			regex:     "(a|b)...c?d...",
+			str:       "xbbcddx",
+			wantMatch: "bbcdd",
 		},
 		{
-			name: "complex expression no match",
-			rgex: "(a|b)...c?d",
-			str:  "ccccd",
-			want: false,
+			name:       "сложное — с именованной группой",
+			regex:      "(<G>(a|b)...)c",
+			str:        "xabbcx",
+			wantMatch:  "abbc",
+			wantGroups: map[string]string{"G": "abb"},
+		},
+
+		{
+			name:      "пустая строка — на пустой строке",
+			regex:     "",
+			str:       "",
+			wantMatch: "",
+		},
+		{
+			name:      "нет совпадения вообще",
+			regex:     "xyz",
+			str:       "abcdef",
+			wantMatch: "",
+		},
+		{
+			name:      "вся строка — совпадение",
+			regex:     "a...b...",
+			str:       "aaabb",
+			wantMatch: "aaabb",
+		},
+		{
+			name:      "перекрывающиеся варианты — первое самое левое",
+			regex:     "aa",
+			str:       "aaa",
+			wantMatch: "aa",
+		},
+		{
+			name:      "длинная строка — поиск в середине",
+			regex:     "hello",
+			str:       "xxhelloyy",
+			wantMatch: "hello",
+		},
+
+		{
+			name:      "конкатенация vs звезда — звезда жадно внутрь",
+			regex:     "a...b",
+			str:       "aaabab",
+			wantMatch: "aaab",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tree, err := BuildAst(tt.rgex)
+			tree, err := BuildAst(tt.regex)
 			if err != nil {
-				t.Fatalf("BuildAst() error = %v", err)
+				t.Fatalf("BuildAst(%q) error = %v", tt.regex, err)
 			}
 
 			nfa := BuildFromAst(tree.GetRoot())
-			got, _ := nfa.Search(tt.str)
-			if got != tt.want {
-				t.Errorf("Search(%q) with regex %q = %v, want %v", tt.str, tt.rgex, got, tt.want)
+			gotMatch, gotGroups := nfa.Search(tt.str)
+
+			if gotMatch != tt.wantMatch {
+				t.Errorf("Search(%q) with regex %q:\n  match = %q, want %q",
+					tt.str, tt.regex, gotMatch, tt.wantMatch)
+			}
+
+			if tt.wantGroups != nil {
+				if gotGroups != nil && len(gotGroups) != len(tt.wantGroups) {
+					t.Errorf("Search(%q) with regex %q:\n  groups count = %d, want %d\n  got:  %v\n  want: %v",
+						tt.str, tt.regex, len(gotGroups), len(tt.wantGroups), gotGroups, tt.wantGroups)
+					return
+				}
+				for name, wantValue := range tt.wantGroups {
+					gotValue, ok := gotGroups[name]
+					if !ok {
+						t.Errorf("Search(%q) with regex %q:\n  missing group %q\n  got:  %v\n  want: %v",
+							tt.str, tt.regex, name, gotGroups, tt.wantGroups)
+						continue
+					}
+					if gotValue != wantValue {
+						t.Errorf("Search(%q) with regex %q:\n  group %q = %q, want %q",
+							tt.str, tt.regex, name, gotValue, wantValue)
+					}
+				}
 			}
 		})
 	}

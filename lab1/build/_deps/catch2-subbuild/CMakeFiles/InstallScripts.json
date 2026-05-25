@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/kostya2506/programming/automata_theory/lab1/build/_deps/catch2-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

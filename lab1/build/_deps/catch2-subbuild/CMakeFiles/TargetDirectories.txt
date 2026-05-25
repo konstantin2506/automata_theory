@@ -1,0 +1,3 @@
+/home/kostya2506/programming/automata_theory/lab1/build/_deps/catch2-subbuild/CMakeFiles/catch2-populate.dir
+/home/kostya2506/programming/automata_theory/lab1/build/_deps/catch2-subbuild/CMakeFiles/edit_cache.dir
+/home/kostya2506/programming/automata_theory/lab1/build/_deps/catch2-subbuild/CMakeFiles/rebuild_cache.dir

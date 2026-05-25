@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -41,10 +42,8 @@ func initialPartition(dfa Dfa) [][]int {
 
 func getGroupIndex(state int, groups [][]int) int {
 	for i, group := range groups {
-		for _, s := range group {
-			if s == state {
-				return i
-			}
+		if slices.Contains(group, state) {
+			return i
 		}
 	}
 	return -1
@@ -105,11 +104,8 @@ func refine(dfa Dfa, groups [][]int) [][]int {
 func buildMinimized(dfa Dfa, groups [][]int) Dfa {
 	startGroupIdx := -1
 	for i, group := range groups {
-		for _, state := range group {
-			if state == 0 {
-				startGroupIdx = i
-				break
-			}
+		if slices.Contains(group, 0) {
+			startGroupIdx = i
 		}
 		if startGroupIdx != -1 {
 			break

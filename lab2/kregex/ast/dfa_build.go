@@ -44,6 +44,7 @@ func (dfa *Dfa) addState(accepting bool) {
 	dfa.table = append(dfa.table, make(map[byte]int))
 	dfa.states = append(dfa.states, accepting)
 }
+
 func (dfa *Dfa) StatesCount() int {
 	return len(dfa.states)
 }
@@ -77,10 +78,17 @@ func createAlphabet(chars []byte) []byte {
 			set[chars[i]] = struct{}{}
 		}
 	}
-	alphabet := make([]byte, 0, len(set))
+	alphabet := make([]byte, len(set))
+	i := 0
 	for char := range set {
-		alphabet = append(alphabet, char)
+		if char == '#' {
+			alphabet[len(set)-1] = '#'
+		} else {
+			alphabet[i] = char
+			i++
+		}
 	}
+
 	return alphabet
 }
 
@@ -105,7 +113,10 @@ func NewDfa(tree Ast) Dfa {
 	}
 	dfaDev.addState(&firstState)
 
-	dfa := Dfa{table: []map[byte]int{}, states: []bool{}, alphabet: alphabet}
+	sortedAlphabet := alphabet[:len(alphabet)-1]
+	slices.Sort(sortedAlphabet)
+
+	dfa := Dfa{table: []map[byte]int{}, states: []bool{}, alphabet: sortedAlphabet}
 	dfa.addState(firstState.accepting)
 
 	states := map[positionKey]*DfaDevState{}
@@ -147,6 +158,7 @@ func NewDfa(tree Ast) Dfa {
 
 		}
 	}
+
 	return dfa
 }
 
@@ -155,12 +167,13 @@ func (dfa *Dfa) Search(str string) string {
 		return ""
 	}
 
-	if accepting := dfa.states[0]; accepting {
-		return ""
-	}
+	// if accepting := dfa.states[0]; accepting {
+	//		return ""
+	//	}
 
 	for i := range len(str) {
 		current := 0
+		jInx := -1
 		for j := i; j < len(str); j++ {
 			char := str[j]
 			next, ok := dfa.table[current][char]
@@ -169,13 +182,17 @@ func (dfa *Dfa) Search(str string) string {
 			}
 			current = next
 			if accepting := dfa.states[current]; accepting {
-				return str[i : j+1]
+				jInx = j
 			}
+		}
+		if jInx != -1 {
+			return str[i : jInx+1]
 		}
 	}
 
 	return ""
 }
+
 func (dfa *Dfa) ToGraphviz() string {
 	var sb strings.Builder
 	sb.WriteString("digraph DFA {\n")
@@ -203,5 +220,5 @@ func (dfa *Dfa) ToGraphviz() string {
 
 func (dfa *Dfa) SaveToDot(filename string) error {
 	dot := dfa.ToGraphviz()
-	return os.WriteFile(filename, []byte(dot), 0644)
+	return os.WriteFile(filename, []byte(dot), 0o644)
 }
