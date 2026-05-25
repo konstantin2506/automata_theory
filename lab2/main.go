@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "eee(e...)b{2}|abc|d...(def)..."
+	str := "a"
 	//	str = "(ab)...|(qw)"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
@@ -29,8 +29,12 @@ func main() {
 
 	err = dfa.SaveToDot("dfa_m.dot")
 
-	complement := ast.Complement(dfa)
+	empty := ast.Difference(dfa, dfa)
 
+	sub := ast.Difference(dfa, empty)
+
+	complement := ast.Complement(dfa)
+	sub.SaveToDot("sub.dot")
 	err = complement.SaveToDot("complement.dot")
 	if err != nil {
 		fmt.Println(err)

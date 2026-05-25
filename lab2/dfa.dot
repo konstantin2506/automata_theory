@@ -3,34 +3,10 @@ digraph DFA {
 
     start [shape=none, label=""];
 
-    0 [label="S0", shape=doublecircle];
-    1 [label="S1", shape=circle];
-    2 [label="S2", shape=doublecircle];
-    3 [label="S3", shape=circle];
-    4 [label="S4", shape=circle];
-    5 [label="S5", shape=circle];
-    6 [label="S6", shape=circle];
-    7 [label="S7", shape=doublecircle];
-    8 [label="S8", shape=doublecircle];
-    9 [label="S9", shape=circle];
-    10 [label="S10", shape=circle];
-    11 [label="S11", shape=circle];
+    0 [label="S0", shape=circle];
+    1 [label="S1", shape=doublecircle];
 
     start -> 0;
 
-    0 -> 2 [label="d"];
-    0 -> 3 [label="e"];
     0 -> 1 [label="a"];
-    1 -> 4 [label="b"];
-    2 -> 2 [label="d"];
-    2 -> 5 [label="e"];
-    3 -> 6 [label="e"];
-    4 -> 7 [label="c"];
-    5 -> 8 [label="f"];
-    6 -> 9 [label="e"];
-    8 -> 10 [label="d"];
-    9 -> 11 [label="b"];
-    9 -> 9 [label="e"];
-    10 -> 5 [label="e"];
-    11 -> 7 [label="b"];
 }

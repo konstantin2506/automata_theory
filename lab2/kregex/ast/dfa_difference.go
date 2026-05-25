@@ -6,9 +6,8 @@ func Difference(a, b Dfa) Dfa {
 	alphabet := lo.Union(a.alphabet, b.alphabet)
 
 	aFull := makeCompleted(a, alphabet)
-	bFull := makeCompleted(b, alphabet)
 
-	product := buildProduct(aFull, bFull, alphabet)
+	product := buildProduct(aFull, Complement(b), alphabet)
 
 	return Minimize(product)
 }
@@ -69,4 +68,12 @@ func buildProduct(a, b Dfa, alphabet []byte) Dfa {
 
 func isDifferenceFinal(a, b Dfa, p pair) bool {
 	return a.states[p.a] && !b.states[p.b]
+}
+
+func (dfa *Dfa) isEmptyLanguage() bool {
+	result := false
+	for _, accepting := range dfa.states {
+		result = result || accepting
+	}
+	return result
 }

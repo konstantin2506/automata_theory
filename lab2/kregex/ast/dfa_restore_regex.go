@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 )
@@ -71,11 +70,11 @@ func RestoreRegex(dfa *Dfa) string {
 	builder := strings.Builder{}
 	for current := range dfa.StatesCount() {
 		ins, outs, hasLoops := getInsOutsLoops(current, transitions)
-		fmt.Println("current:", current)
+		/*fmt.Println("current:", current)
 		fmt.Println("ins:", ins)
 		fmt.Println("outs:", outs)
 		fmt.Println("hasLoops:", hasLoops)
-
+		*/
 		newTransitions := map[RegexTransition]string{}
 		for _, in := range ins {
 			for _, out := range outs {
@@ -114,7 +113,7 @@ func RestoreRegex(dfa *Dfa) string {
 				}
 
 				newTransitions[NewRegexTransition(in, out)] = builder.String()
-				fmt.Println(in, out, builder.String())
+				// fmt.Println(in, out, builder.String())
 			}
 		}
 		for _, in := range ins {
@@ -127,11 +126,7 @@ func RestoreRegex(dfa *Dfa) string {
 		}
 	}
 	regex := transitions[NewRegexTransition(-1, -2)]
-	if strings.HasPrefix(regex, "@|") {
-		regex = "(" + regex[2:] + ")?"
-	}
-	result := strings.Replace(regex, "@|", "", len(regex))
-	return result
+	return regex
 }
 
 type statePair struct {
@@ -140,9 +135,9 @@ type statePair struct {
 }
 
 func AreIsomorphic(first, second *Dfa) bool {
-	if len(first.states) != len(second.states) {
-		return false
-	}
+	// if len(first.states) != len(second.states) {
+	//		return false
+	//	}
 	if !slices.Equal(first.alphabet, second.alphabet) {
 		return false
 	}
