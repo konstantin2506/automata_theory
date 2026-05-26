@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 type ByteStack struct {
 	data []byte

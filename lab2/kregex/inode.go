@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 type Node interface {
 	Children() []Node

@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 import "fmt"
 

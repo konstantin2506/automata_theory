@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 import (
 	lo "github.com/samber/lo"

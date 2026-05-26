@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 type KleeneNode struct {
 	child Node

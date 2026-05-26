@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 import (
 	"fmt"
@@ -312,6 +312,9 @@ func (nfa *Nfa) searchDev(s string) (string, map[string]string) {
 
 func (nfa *Nfa) Search(s string) (string, map[string]string) {
 	res, g := nfa.searchDev(s)
+	if g == nil {
+		return "", nil
+	}
 	if len(g) == 0 {
 		return res, g
 	}

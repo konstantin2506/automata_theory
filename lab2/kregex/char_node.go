@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 type CharNode struct {
 	char   byte

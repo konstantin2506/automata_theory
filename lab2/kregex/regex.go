@@ -1,4 +1,4 @@
-package ast
+package kregex
 
 type Regex struct {
 	nfa      Nfa
@@ -7,7 +7,6 @@ type Regex struct {
 	compiled bool
 }
 
-// builds only nfa for expr
 func NewRegex(expr string) (Regex, error) {
 	tree, err := BuildAst(expr)
 	if err != nil {
@@ -33,7 +32,6 @@ func Compile(expr string) (Regex, error) {
 	return regex, nil
 }
 
-// if compiled uses dfa, else nfa
 func Search(str string, regex *Regex) string {
 	var found string
 	switch regex.compiled {
@@ -46,4 +44,6 @@ func Search(str string, regex *Regex) string {
 	return found
 }
 
-//func SearchWithGroups(str string, regex *Regex) (map[int]string, bool)
+func SearchWithGroups(str string, regex *Regex) (string, map[string]string) {
+	return regex.nfa.Search(str)
+}

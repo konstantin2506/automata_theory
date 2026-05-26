@@ -1,6 +1,6 @@
-// Package ast
+// Package kregex
 // Kostya's regular expressions library
-package ast
+package kregex
 
 import (
 	"fmt"
@@ -121,7 +121,7 @@ func (ast *Ast) TraverseRLRSpace() string {
 
 func (ast *Ast) SaveToDot(filename string) error {
 	dot := ast.ToGraphviz()
-	return os.WriteFile(filename, []byte(dot), 0644)
+	return os.WriteFile(filename, []byte(dot), 0o644)
 }
 
 func (ast *Ast) ToGraphviz() string {
