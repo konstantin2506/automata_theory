@@ -30,12 +30,12 @@ type NfaNode struct {
 	groupName          string
 }
 
-func (n *NfaNode) addEpsilonWith(dst *NfaNode) {
-	n.epsilonTransitions = append(n.epsilonTransitions, EpsilonTransition{dst})
+func (node *NfaNode) addEpsilonWith(dst *NfaNode) {
+	node.epsilonTransitions = append(node.epsilonTransitions, EpsilonTransition{dst})
 }
 
-func (n *NfaNode) addCharWith(src *NfaNode, char byte) {
-	n.charTransition = CharTransition{char, src}
+func (node *NfaNode) addCharWith(src *NfaNode, char byte) {
+	node.charTransition = CharTransition{char, src}
 }
 
 type Nfa struct {
@@ -58,24 +58,6 @@ func buildCharNfa(char byte) Nfa {
 	return Nfa{first, second, nil}
 }
 
-/*
-  - ломает группы почему то хз
-    func buildConcatNfa(nfas []Nfa) Nfa {
-    if len(nfas) < 2 {
-    panic("incorrect concat in buildConcatNfa")
-    }
-    result := nfas[0]
-    for i := 1; i < len(nfas); i++ {
-    next := nfas[i]
-    //result.end.addEpsilonWith(next.start)
-    result.end.epsilonTransitions = append(result.end.epsilonTransitions, next.start.epsilonTransitions...)
-    result.end.charTransitions = append(result.end.charTransitions, next.start.charTransitions...)
-    result.end = next.end
-    }
-    return result
-
-}
-*/
 func buildConcatNfa(nfas []Nfa) Nfa {
 	if len(nfas) < 2 {
 		panic("incorrect concat in buildConcatNfa")
@@ -164,11 +146,11 @@ func BuildFromAst(root Node) Nfa {
 	}
 }
 
-func (this *NfaNode) buildEpsilonClosure() map[*NfaNode]struct{} {
+func (node *NfaNode) buildEpsilonClosure() map[*NfaNode]struct{} {
 	closure := map[*NfaNode]struct{}{}
 	stack := []*NfaNode{}
-	stack = append(stack, this)
-	closure[this] = struct{}{}
+	stack = append(stack, node)
+	closure[node] = struct{}{}
 
 	for len(stack) > 0 {
 		current := stack[len(stack)-1]
@@ -254,21 +236,25 @@ func (nfa *Nfa) searchDev(s string) (string, map[string]string) {
 
 	for i := 0; i < len(s); i++ {
 		c := s[i]
+		fmt.Println("States_", i, states)
 
 		// Начать новый матч с текущей позиции
-		for node := range nfa.closures[nfa.start] {
+		for node := range nfa.closures[anchor] {
 			// Не перезаписываем, если уже есть с более ранним start
-			if _, exists := states[node]; !exists {
+			if prev, exists := states[node]; !exists || i < prev {
 				states[node] = i
+				fmt.Println("new", &node, i)
 			}
 		}
 
 		// Переходы по символу
 		nextStates := make(map[*NfaNode]int)
 		for node, start := range states {
-			if node.charTransition.char == c && node.charTransition.dst != nil {
-				nextStates[node.charTransition.dst] = start
-				dst := node.charTransition.dst
+			if dst := node.charTransition.dst; node.charTransition.char == c && dst != nil {
+				if prev, ok := nextStates[dst]; !ok || start < prev {
+					nextStates[node.charTransition.dst] = start
+				}
+				fmt.Println("nextStates", start)
 
 				for node := range nfa.closures[dst] {
 					if node.nodeType == GroupEnd {
@@ -290,8 +276,9 @@ func (nfa *Nfa) searchDev(s string) (string, map[string]string) {
 		states = make(map[*NfaNode]int)
 		for node, start := range nextStates {
 			for target := range nfa.closures[node] {
-				if _, exists := states[target]; !exists {
+				if prev, exists := states[target]; !exists || start < prev {
 					states[target] = start
+					fmt.Println("epsilon", start)
 				}
 			}
 		}
@@ -299,6 +286,7 @@ func (nfa *Nfa) searchDev(s string) (string, map[string]string) {
 		// Проверка финала
 		if start, ok := states[nfa.end]; ok {
 			end := i + 1
+			fmt.Println(start, bestStart, bestEnd)
 			if start < bestStart || bestStart == -1 || (start == bestStart && end > bestEnd) {
 				bestStart = start
 				bestEnd = end
@@ -324,172 +312,11 @@ func (nfa *Nfa) searchDev(s string) (string, map[string]string) {
 
 func (nfa *Nfa) Search(s string) (string, map[string]string) {
 	res, g := nfa.searchDev(s)
-	if g == nil {
+	if len(g) == 0 {
 		return res, g
 	}
 	return nfa.searchDev(res)
 }
-
-/*
-func (nfa *Nfa) Match(str string) (bool, map[string]string, int) {
-	if nfa.start == nil && nfa.end == nil && str == "" {
-		return true, nil, 0
-	}
-	currentStates := nfa.start.buildEpsilonClosure()
-	currentStates[nfa.start] = struct{}{}
-	groupsIndexs := map[string][]int{}
-	groups := map[string]string{}
-
-	lastMatchPos := -1 // Храним последнюю позицию, где достигли конечного состояния
-
-	for i := 0; i < len(str); i++ {
-		ch := str[i]
-		nextStates := map[*NfaNode]struct{}{}
-
-		for state := range currentStates {
-			fmt.Println(state.nodeType)
-			if state.nodeType == GroupStart {
-				fmt.Println("Start", state.groupName)
-				if _, ok := groupsIndexs[state.groupName]; !ok {
-					groupsIndexs[state.groupName] = make([]int, 2)
-					groupsIndexs[state.groupName][0] = -1
-					groupsIndexs[state.groupName][1] = -1
-				}
-				if groupsIndexs[state.groupName][0] == -1 {
-					groupsIndexs[state.groupName][0] = i
-				}
-			} else if state.nodeType == GroupEnd {
-				fmt.Println("End", state.groupName)
-				if _, ok := groupsIndexs[state.groupName]; !ok {
-					groupsIndexs[state.groupName] = make([]int, 2)
-					groupsIndexs[state.groupName][0] = -1
-					groupsIndexs[state.groupName][1] = -1
-				}
-				groupsIndexs[state.groupName][1] = i - 1
-			}
-
-			transition := state.charTransition
-			if transition.char == ch {
-				nextStates[transition.dst] = struct{}{}
-			}
-
-		}
-
-		clear(currentStates)
-		for nextState := range nextStates {
-			appendSetToFirst(currentStates, nextState.buildEpsilonClosure())
-			currentStates[nextState] = struct{}{}
-		}
-
-		if _, ok := currentStates[nfa.end]; ok {
-			lastMatchPos = i
-		}
-
-		if len(currentStates) == 0 {
-			break
-		}
-	}
-
-	if lastMatchPos == -1 {
-		return false, nil, 0
-	}
-
-	for state := range currentStates {
-		fmt.Println(state.nodeType)
-		if state.nodeType == GroupEnd && groupsIndexs[state.groupName][1] == -1 {
-			fmt.Println("End", state.groupName)
-			groupsIndexs[state.groupName][1] = lastMatchPos
-		}
-	}
-
-	for groupName, indx := range groupsIndexs {
-		fmt.Println(indx)
-		if indx[0] != -1 && indx[1] != -1 && indx[0] <= indx[1] {
-			groups[groupName] = str[indx[0] : indx[1]+1]
-		}
-	}
-	return true, groups, lastMatchPos + 1
-}
-func (nfa *Nfa) Search(str string) (string, map[string]string) {
-	if nfa.start == nil && nfa.end == nil && str == "" {
-		return "", nil
-	}
-
-	currentStates := nfa.start.buildEpsilonClosure()
-	currentStates[nfa.start] = struct{}{}
-
-	var longestMatch string
-	var longestGroups map[string]string
-	groupsIndexs := map[string][]int{}
-	matchStartPos := -1
-	currentMatchStart := 0
-
-	for i := 0; i < len(str); i++ {
-		ch := str[i]
-		nextStates := map[*NfaNode]struct{}{}
-
-		if matchStartPos == -1 && len(currentStates) > 0 {
-			matchStartPos = i
-			currentMatchStart = i
-		}
-
-		for state := range currentStates {
-			if state.nodeType == GroupStart {
-				if _, ok := groupsIndexs[state.groupName]; !ok {
-					groupsIndexs[state.groupName] = make([]int, 2)
-					groupsIndexs[state.groupName][0] = -1
-					groupsIndexs[state.groupName][1] = -1
-				}
-				if groupsIndexs[state.groupName][0] == -1 {
-					groupsIndexs[state.groupName][0] = i
-				}
-			} else if state.nodeType == GroupEnd {
-				if _, ok := groupsIndexs[state.groupName]; !ok {
-					groupsIndexs[state.groupName] = make([]int, 2)
-					groupsIndexs[state.groupName][0] = -1
-					groupsIndexs[state.groupName][1] = -1
-				}
-				groupsIndexs[state.groupName][1] = i - 1
-			}
-
-			for _, transition := range state.charTransitions {
-				if transition.char == ch {
-					nextStates[transition.dst] = struct{}{}
-				}
-			}
-		}
-
-		clear(currentStates)
-		for nextState := range nextStates {
-			appendSetToFirst(currentStates, nextState.buildEpsilonClosure())
-			currentStates[nextState] = struct{}{}
-		}
-
-		if _, ok := currentStates[nfa.end]; ok {
-			matchLen := i - currentMatchStart + 1
-			if matchLen > len(longestMatch) {
-				longestMatch = str[currentMatchStart : i+1]
-				longestGroups = make(map[string]string)
-				for groupName, indx := range groupsIndexs {
-					if indx[0] != -1 && indx[1] != -1 && indx[0] <= indx[1] {
-						longestGroups[groupName] = str[indx[0] : indx[1]+1]
-					}
-				}
-			}
-		}
-
-		if len(currentStates) == 0 {
-			currentStates = nfa.start.buildEpsilonClosure()
-			currentStates[nfa.start] = struct{}{}
-			matchStartPos = -1
-			groupsIndexs = map[string][]int{}
-			currentMatchStart = i + 1
-		}
-	}
-
-	return longestMatch, longestGroups
-}
-*/
 
 func (nfa *Nfa) ToGraphviz() string {
 	var builder strings.Builder

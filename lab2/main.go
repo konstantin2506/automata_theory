@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	str := "a"
+	str := "aa...b..."
 	//	str = "(ab)...|(qw)"
 	//[(), ?, |, +, ()]
 	fmt.Println(str)
@@ -40,7 +40,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	toSearch := "qqqbbbbbbccaaaaaaaac"
+	toSearch := "aaaaaaaabb"
 	found, groups := nfa.Search(toSearch)
 	fmt.Printf("Str: '%s' - resNFA=%s, groups = %v\n", toSearch, found, groups)
 	substr := dfa.Search(toSearch)

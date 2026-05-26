@@ -13,6 +13,12 @@ func TestNfa_Search(t *testing.T) {
 		wantGroups map[string]string
 	}{
 		{
+			name:      "1",
+			regex:     "aa...b...c...|q",
+			str:       "aaaaabbbccq",
+			wantMatch: "aaaaabbbcc",
+		},
+		{
 			name:      "один символ — точное совпадение",
 			regex:     "a",
 			str:       "a",

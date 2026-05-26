@@ -5,8 +5,12 @@ digraph DFA {
 
     0 [label="S0", shape=circle];
     1 [label="S1", shape=doublecircle];
+    2 [label="S2", shape=doublecircle];
 
     start -> 0;
 
     0 -> 1 [label="a"];
+    1 -> 2 [label="b"];
+    1 -> 1 [label="a"];
+    2 -> 2 [label="b"];
 }
