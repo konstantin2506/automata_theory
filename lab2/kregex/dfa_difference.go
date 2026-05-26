@@ -24,7 +24,7 @@ func buildProduct(a, b Dfa, alphabet []byte) Dfa {
 	pairToID[startPair] = 0
 
 	table := []map[byte]int{make(map[byte]int)}
-	states := []bool{isDifferenceFinal(a, b, startPair)}
+	states := []bool{isDoubleFinal(a, b, startPair)}
 
 	queue := []pair{startPair}
 	nextID := 1
@@ -48,7 +48,7 @@ func buildProduct(a, b Dfa, alphabet []byte) Dfa {
 				table = append(table, make(map[byte]int))
 				table[currentID][sym] = nextID
 
-				states = append(states, isDifferenceFinal(a, b, nextPair))
+				states = append(states, isDoubleFinal(a, b, nextPair))
 
 				queue = append(queue, nextPair)
 				nextID++
@@ -66,7 +66,7 @@ func buildProduct(a, b Dfa, alphabet []byte) Dfa {
 	}
 }
 
-func isDifferenceFinal(a, b Dfa, p pair) bool {
+func isDoubleFinal(a, b Dfa, p pair) bool {
 	return a.states[p.a] && b.states[p.b]
 }
 

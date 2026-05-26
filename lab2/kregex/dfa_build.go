@@ -208,9 +208,9 @@ func (dfa *Dfa) ToGraphviz() string {
 	}
 	sb.WriteString("\n    start -> 0;\n\n")
 
-	for fromId, transitions := range dfa.table {
+	for fromID, transitions := range dfa.table {
 		for char, to := range transitions {
-			fmt.Fprintf(&sb, "    %d -> %d [label=\"%c\"];\n", fromId, to, char)
+			fmt.Fprintf(&sb, "    %d -> %d [label=\"%c\"];\n", fromID, to, char)
 		}
 	}
 

@@ -34,10 +34,6 @@ func (node *NfaNode) addEpsilonWith(dst *NfaNode) {
 	node.epsilonTransitions = append(node.epsilonTransitions, EpsilonTransition{dst})
 }
 
-func (node *NfaNode) addCharWith(src *NfaNode, char byte) {
-	node.charTransition = CharTransition{char, src}
-}
-
 type Nfa struct {
 	start    *NfaNode
 	end      *NfaNode
