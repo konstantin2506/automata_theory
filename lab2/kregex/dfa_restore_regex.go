@@ -70,10 +70,10 @@ func RestoreRegex(dfa *Dfa) string {
 	builder := strings.Builder{}
 	for current := range dfa.StatesCount() {
 		ins, outs, hasLoops := getInsOutsLoops(current, transitions)
-		/*fmt.Println("current:", current)
-		fmt.Println("ins:", ins)
-		fmt.Println("outs:", outs)
-		fmt.Println("hasLoops:", hasLoops)
+		/*//fmt.Println("current:", current)
+		//fmt.Println("ins:", ins)
+		//fmt.Println("outs:", outs)
+		//fmt.Println("hasLoops:", hasLoops)
 		*/
 		newTransitions := map[RegexTransition]string{}
 		for _, in := range ins {
@@ -113,7 +113,7 @@ func RestoreRegex(dfa *Dfa) string {
 				}
 
 				newTransitions[NewRegexTransition(in, out)] = builder.String()
-				// fmt.Println(in, out, builder.String())
+				// //fmt.Println(in, out, builder.String())
 			}
 		}
 		for _, in := range ins {

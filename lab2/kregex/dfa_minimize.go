@@ -62,7 +62,7 @@ func createSignature(state int, dfa Dfa, groups [][]int) string {
 }
 
 func splitGroup(group []int, dfa Dfa, groups [][]int) [][]int {
-	sigMap := map[string][]int{} // ex: "1,-,2" --> state
+	sigMap := map[string][]int{} // ex: "1,-,2" --> states
 
 	for _, state := range group {
 		sig := createSignature(state, dfa, groups)
@@ -106,8 +106,6 @@ func buildMinimized(dfa Dfa, groups [][]int) Dfa {
 	for i, group := range groups {
 		if slices.Contains(group, 0) {
 			startGroupIdx = i
-		}
-		if startGroupIdx != -1 {
 			break
 		}
 	}
@@ -135,12 +133,8 @@ func buildMinimized(dfa Dfa, groups [][]int) Dfa {
 		if dfa.states[oldState] {
 			newStates[newState] = true
 		}
-	}
-
-	for newState, group := range groups {
-		rep := group[0]
 		for _, char := range dfa.alphabet {
-			if next, ok := dfa.table[rep][char]; ok {
+			if next, ok := dfa.table[oldState][char]; ok {
 				newTable[newState][char] = oldToNew[next]
 			}
 		}

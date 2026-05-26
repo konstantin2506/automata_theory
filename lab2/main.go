@@ -3,17 +3,17 @@ package main
 import (
 	"fmt"
 
-	ast "kregex/kregex/ast"
+	ast "kregex/kregex"
 )
 
 func main() {
 	str := "aa...b..."
 	//	str = "(ab)...|(qw)"
 	//[(), ?, |, +, ()]
-	fmt.Println(str)
+	//fmt.Println(str)
 	tree, err := ast.BuildAst(str)
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return
 	}
 	nfa := ast.BuildFromAst(tree.GetRoot())
@@ -22,22 +22,20 @@ func main() {
 	tree.Print(1)
 
 	dfa := ast.NewDfa(tree)
-	fmt.Println(dfa.StatesCount())
+	// fmt.Println(dfa.StatesCount())
 	err = dfa.SaveToDot("dfa.dot")
 	dfa = ast.Minimize(dfa)
-	fmt.Println(dfa.StatesCount())
+	// fmt.Println(dfa.StatesCount())
 
 	err = dfa.SaveToDot("dfa_m.dot")
 
-	empty := ast.Difference(dfa, dfa)
-
-	sub := ast.Difference(dfa, empty)
+	sub := ast.Difference(dfa, dfa)
 
 	complement := ast.Complement(dfa)
 	sub.SaveToDot("sub.dot")
 	err = complement.SaveToDot("complement.dot")
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 	}
 
 	toSearch := "aaaaaaaabb"
@@ -47,12 +45,12 @@ func main() {
 	fmt.Printf("Str: '%s' - resDFA=%s\n", toSearch, substr)
 
 	rx := ast.RestoreRegex(&dfa)
-	fmt.Println("restored:", rx)
+	// fmt.Println("restored:", rx)
 	rxTree, _ := ast.BuildAst(rx)
 	fromRegex := ast.Minimize(ast.NewDfa(rxTree))
 	fromRegex.SaveToDot("regex.dot")
 	// fromRegex.PrintDebug()
 	// bad, _ := ast.BuildAst("aboa")
 	// b := ast.Minimize(ast.NewDfa(bad))
-	fmt.Println("Are isomorphic:", ast.AreIsomorphic(&fromRegex, &dfa))
+	// fmt.Println("Are isomorphic:", ast.AreIsomorphic(&fromRegex, &dfa))
 }

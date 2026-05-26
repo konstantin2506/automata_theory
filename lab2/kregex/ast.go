@@ -112,7 +112,7 @@ func HandleParens(ns NodeStack) NodeStack {
 }
 
 func (ast *Ast) Print(depth int) {
-	fmt.Println(ast.TraverseRLR("", 1, '\n', " "))
+	//fmt.Println(ast.TraverseRLR("", 1, '\n', " "))
 }
 
 func (ast *Ast) TraverseRLRSpace() string {

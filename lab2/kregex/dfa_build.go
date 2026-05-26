@@ -59,7 +59,7 @@ func createPositionKey(positions []int) positionKey {
 	for _, pos := range positions {
 		strPoses = append(strPoses, strconv.Itoa(pos))
 	}
-	var pkey positionKey = positionKey(strings.Join(strPoses, ","))
+	pkey := positionKey(strings.Join(strPoses, ","))
 	return pkey
 }
 
@@ -142,7 +142,7 @@ func NewDfa(tree Ast) Dfa {
 				continue
 			}
 			newState := NewDfaDevState(id, union)
-			if lo.Contains(union, len(chars)-1) { // '#'
+			if lo.Contains(union, len(chars)-1) { // pos of '#'
 				newState.accepting = true
 			}
 			if ok := dfaDev.addState(&newState); ok {

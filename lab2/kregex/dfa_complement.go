@@ -3,7 +3,6 @@ package kregex
 import "maps"
 
 func Complement(dfa Dfa) Dfa {
-
 	full := makeCompleted(dfa, dfa.alphabet)
 
 	inverted := make([]bool, len(full.states))

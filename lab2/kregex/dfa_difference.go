@@ -6,8 +6,8 @@ func Difference(a, b Dfa) Dfa {
 	alphabet := lo.Union(a.alphabet, b.alphabet)
 
 	aFull := makeCompleted(a, alphabet)
-
-	product := buildProduct(aFull, Complement(b), alphabet)
+	bFull := makeCompleted(Complement(b), alphabet)
+	product := buildProduct(aFull, bFull, alphabet)
 
 	return Minimize(product)
 }
@@ -67,13 +67,33 @@ func buildProduct(a, b Dfa, alphabet []byte) Dfa {
 }
 
 func isDifferenceFinal(a, b Dfa, p pair) bool {
-	return a.states[p.a] && !b.states[p.b]
+	return a.states[p.a] && b.states[p.b]
 }
 
 func (dfa *Dfa) isEmptyLanguage() bool {
-	result := false
-	for _, accepting := range dfa.states {
-		result = result || accepting
+	if len(dfa.states) == 0 {
+		return true
 	}
-	return result
+
+	visited := make([]bool, len(dfa.states))
+	queue := []int{0}
+	visited[0] = true
+
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		if dfa.states[current] {
+			return false
+		}
+
+		for _, next := range dfa.table[current] {
+			if !visited[next] {
+				visited[next] = true
+				queue = append(queue, next)
+			}
+		}
+	}
+
+	return true
 }

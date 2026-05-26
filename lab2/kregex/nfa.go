@@ -217,7 +217,6 @@ func (nfa *Nfa) searchDev(s string) (string, map[string]string) {
 	starts := map[string]int{}
 	ends := map[string]int{}
 
-	// anchor: пропускает любые символы, может начать матч
 	anchor := newNfaNode()
 	anchor.addEpsilonWith(nfa.start)
 	nfa.closures[anchor] = anchor.buildEpsilonClosure()
@@ -225,79 +224,72 @@ func (nfa *Nfa) searchDev(s string) (string, map[string]string) {
 	bestStart := -1
 	bestEnd := -1
 
-	// Текущее множество состояний + начало матча для каждого
-
 	states := make(map[*NfaNode]int) // node -> начало матча
 
-	// Инициализация
 	for node := range nfa.closures[anchor] {
 		states[node] = 0
 	}
 
 	for i := 0; i < len(s); i++ {
 		c := s[i]
-		fmt.Println("States_", i, states)
+		// fmt.Println("States_", i, states)
 
-		// Начать новый матч с текущей позиции
 		for node := range nfa.closures[anchor] {
 			// Не перезаписываем, если уже есть с более ранним start
 			if prev, exists := states[node]; !exists || i < prev {
 				states[node] = i
-				fmt.Println("new", &node, i)
+				// fmt.Println("new", &node, i)
 			}
 		}
 
-		// Переходы по символу
 		nextStates := make(map[*NfaNode]int)
 		for node, start := range states {
 			if dst := node.charTransition.dst; node.charTransition.char == c && dst != nil {
 				if prev, ok := nextStates[dst]; !ok || start < prev {
 					nextStates[node.charTransition.dst] = start
 				}
-				fmt.Println("nextStates", start)
+				// fmt.Println("nextStates", start)
 
 				for node := range nfa.closures[dst] {
 					if node.nodeType == GroupEnd {
-						fmt.Println("END of : ", node.groupName, string(s[i]))
+						// fmt.Println("END of : ", node.groupName, string(s[i]))
 						ends[node.groupName] = i
 					}
 				}
 			}
 			if node.nodeType == GroupStart {
 				if _, exists := starts[node.groupName]; !exists {
-					fmt.Println("Start of : ", node.groupName, string(s[i]))
+					// fmt.Println("Start of : ", node.groupName, string(s[i]))
 					starts[node.groupName] = i
 				}
 			}
 
 		}
 
-		// ε-замыкание
 		states = make(map[*NfaNode]int)
 		for node, start := range nextStates {
 			for target := range nfa.closures[node] {
 				if prev, exists := states[target]; !exists || start < prev {
 					states[target] = start
-					fmt.Println("epsilon", start)
+					// fmt.Println("epsilon", start)
 				}
 			}
 		}
 
-		// Проверка финала
 		if start, ok := states[nfa.end]; ok {
 			end := i + 1
-			fmt.Println(start, bestStart, bestEnd)
+			// fmt.Println(start, bestStart, bestEnd)
 			if start < bestStart || bestStart == -1 || (start == bestStart && end > bestEnd) {
 				bestStart = start
 				bestEnd = end
-				fmt.Println("Complete:", s[start:end])
+				// fmt.Println("Complete:", s[start:end])
 			}
 		}
 	}
 
 	delete(nfa.closures, anchor)
-	fmt.Println(starts)
-	fmt.Println(ends)
+	// fmt.Println(starts)
+	// fmt.Println(ends)
 
 	if bestStart == -1 {
 		return "", nil
