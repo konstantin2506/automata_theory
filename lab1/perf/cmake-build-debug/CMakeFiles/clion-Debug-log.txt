@@ -1,0 +1,1 @@
+CMakeLists.txt not found in /home/kostya2506/programming/automata_theory/lab1/perf Select CMakeLists.txt
