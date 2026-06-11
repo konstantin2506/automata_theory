@@ -84,24 +84,104 @@ import (
 %token <num> DECIMAL;
 
 
-
-
 %%
 
+top:
+    statement_list
+    {
+        fmt.Println("\n[Парсер]: Успешное окончание разбора выражения!")
+    }
+;
+
+
+statement_list:
+    statement
+|   statement_list statement    
+;
+statement:
+    variable_init_statement
+;
+
+variable_init_statement:
+    left_part_assign arifmetic_expr STATEMENT_END
+;
+
+left_part_init:
+    variable_type name_list ASSIGNMENT_OPERATOR
+|   variable_type name_list dimension ASSIGNMENT_OPERATOR
+
+;
+
+variable_type:
+    DIGIT_TYPE
+|   LOGIC_TYPE    
+
+name_list:
+    NAME
+
+|   name_list COMMA NAME
+;
+
 arifmetic_expr:
+    term
+;
+term:
+    term PLUS factor
+    {
+        fmt.Println("term -> term + factor")
+    }
+|   term MINUS factor
+    {
+        fmt.Println("term -> term - factor")
+    }
+
+|   factor
+    {
+        fmt.Println("term -> factor")
+    }
+;
+
+factor:
+    factor MULT basic_part_ar
+    {
+        fmt.Println("factor -> factor * basic_part_ar")
+    }
+|    factor DIV basic_part_ar
+    {
+        fmt.Println("factor -> factor / basic_part_ar")
+    }
+
+|   basic_part_ar
+    {
+        fmt.Println("factor -> basic_part_ar")
+    }
+;
+
+basic_part_ar:
     DECIMAL
     {
-        $$ = $1
+        fmt.Printf("basic_part_ar -> DECIMAL (%d)\n", $1)
     }
-    arifmetic_expr PLUS DECIMAL
+|   DEFAULT_BRACE_LEFT term DEFAULT_BRACE_RIGHT
     {
-        
+        fmt.Println("basic_part_ar -> ( term )")
     }
+
+;
+
+dimension:
+    SQUARE_BRACE_LEFT dimension_inner SQUARE_BRACE_RIGHT
+;
+dimension_inner:
+    arifmetic_expr
+|   dimension_inner COMMA arifmetic_expr
+;    
+
 
 %%
 
 // Функция вывода ошибок, требуемая для yyLexer
-func (l *Lexer) Error(s string) {
+func (l *lexerCtx) Error(s string) {
 	fmt.Fprintf(os.Stderr, "Ошибка: %s\n", s)
 }
 

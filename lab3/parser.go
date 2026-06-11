@@ -18,3 +18,585 @@ type yySymType struct {
 	num int
 	str string
 }
+
+const PLUS = 57346
+const MINUS = 57347
+const MULT = 57348
+const DIV = 57349
+const TRUE = 57350
+const FALSE = 57351
+const TO_LOGIC_CAST = 57352
+const TO_DIGIT_CAST = 57353
+const SIZE_OPERATOR = 57354
+const RESIZE_OPERATOR = 57355
+const SQUARE_BRACE_LEFT = 57356
+const SQUARE_BRACE_RIGHT = 57357
+const GROUP_BRACE_LEFT = 57358
+const GROUP_BRACE_RIGHT = 57359
+const DEFAULT_BRACE_LEFT = 57360
+const DEFAULT_BRACE_RIGHT = 57361
+const DIGIT_TYPE = 57362
+const LOGIC_TYPE = 57363
+const ASSIGNMENT_OPERATOR = 57364
+const EQUALS = 57365
+const LOWER_THEN = 57366
+const LOWER_THEN_OR_EQUALS = 57367
+const GREATER_THEN = 57368
+const GREATER_THEN_OR_EQUALS = 57369
+const COMMA = 57370
+const STATEMENT_END = 57371
+const NOT = 57372
+const AND = 57373
+const MOST = 57374
+const FOR = 57375
+const STOP = 57376
+const STEP = 57377
+const CHECK = 57378
+const THEN = 57379
+const OTHERWISE = 57380
+const MOVE_OPERATOR = 57381
+const ROTATE_OPERATOR = 57382
+const SURROUNDINGS = 57383
+const FUNCTION_DECL = 57384
+const FUNCTION_CALL = 57385
+const RETURN = 57386
+const PLEASE = 57387
+const THANK_YOU = 57388
+const NAME = 57389
+const HEX = 57390
+const OCTAL = 57391
+const DECIMAL = 57392
+
+var yyToknames = [...]string{
+	"$end",
+	"error",
+	"$unk",
+	"PLUS",
+	"MINUS",
+	"MULT",
+	"DIV",
+	"TRUE",
+	"FALSE",
+	"TO_LOGIC_CAST",
+	"TO_DIGIT_CAST",
+	"SIZE_OPERATOR",
+	"RESIZE_OPERATOR",
+	"SQUARE_BRACE_LEFT",
+	"SQUARE_BRACE_RIGHT",
+	"GROUP_BRACE_LEFT",
+	"GROUP_BRACE_RIGHT",
+	"DEFAULT_BRACE_LEFT",
+	"DEFAULT_BRACE_RIGHT",
+	"DIGIT_TYPE",
+	"LOGIC_TYPE",
+	"ASSIGNMENT_OPERATOR",
+	"EQUALS",
+	"LOWER_THEN",
+	"LOWER_THEN_OR_EQUALS",
+	"GREATER_THEN",
+	"GREATER_THEN_OR_EQUALS",
+	"COMMA",
+	"STATEMENT_END",
+	"NOT",
+	"AND",
+	"MOST",
+	"FOR",
+	"STOP",
+	"STEP",
+	"CHECK",
+	"THEN",
+	"OTHERWISE",
+	"MOVE_OPERATOR",
+	"ROTATE_OPERATOR",
+	"SURROUNDINGS",
+	"FUNCTION_DECL",
+	"FUNCTION_CALL",
+	"RETURN",
+	"PLEASE",
+	"THANK_YOU",
+	"NAME",
+	"HEX",
+	"OCTAL",
+	"DECIMAL",
+}
+
+var yyStatenames = [...]string{}
+
+const yyEofCode = 1
+const yyErrCode = 2
+const yyInitialStackSize = 16
+
+//line parser.y:181
+
+// Функция вывода ошибок, требуемая для yyLexer
+func (l *lexerCtx) Error(s string) {
+	fmt.Fprintf(os.Stderr, "Ошибка: %s\n", s)
+}
+
+//line yacctab:1
+var yyExca = [...]int8{
+	-1, 1,
+	1, -1,
+	-2, 0,
+}
+
+const yyPrivate = 57344
+
+const yyLast = 43
+
+var yyAct = [...]int8{
+	15, 34, 17, 10, 27, 18, 37, 13, 33, 7,
+	8, 11, 24, 12, 21, 22, 19, 20, 26, 38,
+	19, 20, 3, 35, 25, 9, 16, 23, 6, 30,
+	31, 36, 14, 28, 29, 32, 5, 4, 2, 1,
+	0, 0, 39,
+}
+
+var yyPact = [...]int16{
+	-11, -1000, -11, -1000, -1000, -18, -45, -1000, -1000, -1000,
+	-24, 12, 8, -1000, -1000, -18, -10, -1000, -1000, -18,
+	-18, -18, -18, 16, -1000, -14, -46, -18, 8, 8,
+	-1000, -1000, -1000, -1000, -1000, -9, -1000, -1000, -18, -1000,
+}
+
+var yyPgo = [...]int8{
+	0, 39, 38, 22, 37, 36, 3, 28, 26, 24,
+	11, 13, 7, 23,
+}
+
+var yyR1 = [...]int8{
+	0, 1, 2, 2, 3, 4, 5, 5, 7, 7,
+	8, 8, 6, 10, 10, 10, 11, 11, 11, 12,
+	12, 9, 13, 13,
+}
+
+var yyR2 = [...]int8{
+	0, 1, 1, 2, 1, 3, 3, 4, 1, 1,
+	1, 3, 1, 3, 3, 1, 3, 3, 1, 1,
+	3, 3, 1, 3,
+}
+
+var yyChk = [...]int16{
+	-1000, -1, -2, -3, -4, -5, -7, 20, 21, -3,
+	-6, -10, -11, -12, 50, 18, -8, 47, 29, 4,
+	5, 6, 7, -10, 22, -9, 28, 14, -11, -11,
+	-12, -12, 19, 22, 47, -13, -6, 15, 28, -6,
+}
+
+var yyDef = [...]int8{
+	0, -2, 1, 2, 4, 0, 0, 8, 9, 3,
+	0, 12, 15, 18, 19, 0, 0, 10, 5, 0,
+	0, 0, 0, 0, 6, 0, 0, 0, 13, 14,
+	16, 17, 20, 7, 11, 0, 22, 21, 0, 23,
+}
+
+var yyTok1 = [...]int8{
+	1,
+}
+
+var yyTok2 = [...]int8{
+	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+	22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+	32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+	42, 43, 44, 45, 46, 47, 48, 49, 50,
+}
+
+var yyTok3 = [...]int8{
+	0,
+}
+
+var yyErrorMessages = [...]struct {
+	state int
+	token int
+	msg   string
+}{}
+
+//line yaccpar:1
+
+/*	parser for yacc output	*/
+
+var (
+	yyDebug        = 0
+	yyErrorVerbose = false
+)
+
+type yyLexer interface {
+	Lex(lval *yySymType) int
+	Error(s string)
+}
+
+type yyParser interface {
+	Parse(yyLexer) int
+	Lookahead() int
+}
+
+type yyParserImpl struct {
+	lval  yySymType
+	stack [yyInitialStackSize]yySymType
+	char  int
+}
+
+func (p *yyParserImpl) Lookahead() int {
+	return p.char
+}
+
+func yyNewParser() yyParser {
+	return &yyParserImpl{}
+}
+
+const yyFlag = -1000
+
+func yyTokname(c int) string {
+	if c >= 1 && c-1 < len(yyToknames) {
+		if yyToknames[c-1] != "" {
+			return yyToknames[c-1]
+		}
+	}
+	return __yyfmt__.Sprintf("tok-%v", c)
+}
+
+func yyStatname(s int) string {
+	if s >= 0 && s < len(yyStatenames) {
+		if yyStatenames[s] != "" {
+			return yyStatenames[s]
+		}
+	}
+	return __yyfmt__.Sprintf("state-%v", s)
+}
+
+func yyErrorMessage(state, lookAhead int) string {
+	const TOKSTART = 4
+
+	if !yyErrorVerbose {
+		return "syntax error"
+	}
+
+	for _, e := range yyErrorMessages {
+		if e.state == state && e.token == lookAhead {
+			return "syntax error: " + e.msg
+		}
+	}
+
+	res := "syntax error: unexpected " + yyTokname(lookAhead)
+
+	// To match Bison, suggest at most four expected tokens.
+	expected := make([]int, 0, 4)
+
+	// Look for shiftable tokens.
+	base := int(yyPact[state])
+	for tok := TOKSTART; tok-1 < len(yyToknames); tok++ {
+		if n := base + tok; n >= 0 && n < yyLast && int(yyChk[int(yyAct[n])]) == tok {
+			if len(expected) == cap(expected) {
+				return res
+			}
+			expected = append(expected, tok)
+		}
+	}
+
+	if yyDef[state] == -2 {
+		i := 0
+		for yyExca[i] != -1 || int(yyExca[i+1]) != state {
+			i += 2
+		}
+
+		// Look for tokens that we accept or reduce.
+		for i += 2; yyExca[i] >= 0; i += 2 {
+			tok := int(yyExca[i])
+			if tok < TOKSTART || yyExca[i+1] == 0 {
+				continue
+			}
+			if len(expected) == cap(expected) {
+				return res
+			}
+			expected = append(expected, tok)
+		}
+
+		// If the default action is to accept or reduce, give up.
+		if yyExca[i+1] != 0 {
+			return res
+		}
+	}
+
+	for i, tok := range expected {
+		if i == 0 {
+			res += ", expecting "
+		} else {
+			res += " or "
+		}
+		res += yyTokname(tok)
+	}
+	return res
+}
+
+func yylex1(lex yyLexer, lval *yySymType) (char, token int) {
+	token = 0
+	char = lex.Lex(lval)
+	if char <= 0 {
+		token = int(yyTok1[0])
+		goto out
+	}
+	if char < len(yyTok1) {
+		token = int(yyTok1[char])
+		goto out
+	}
+	if char >= yyPrivate {
+		if char < yyPrivate+len(yyTok2) {
+			token = int(yyTok2[char-yyPrivate])
+			goto out
+		}
+	}
+	for i := 0; i < len(yyTok3); i += 2 {
+		token = int(yyTok3[i+0])
+		if token == char {
+			token = int(yyTok3[i+1])
+			goto out
+		}
+	}
+
+out:
+	if token == 0 {
+		token = int(yyTok2[1]) /* unknown char */
+	}
+	if yyDebug >= 3 {
+		__yyfmt__.Printf("lex %s(%d)\n", yyTokname(token), uint(char))
+	}
+	return char, token
+}
+
+func yyParse(yylex yyLexer) int {
+	return yyNewParser().Parse(yylex)
+}
+
+func (yyrcvr *yyParserImpl) Parse(yylex yyLexer) int {
+	var yyn int
+	var yyVAL yySymType
+	var yyDollar []yySymType
+	_ = yyDollar // silence set and not used
+	yyS := yyrcvr.stack[:]
+
+	Nerrs := 0   /* number of errors */
+	Errflag := 0 /* error recovery flag */
+	yystate := 0
+	yyrcvr.char = -1
+	yytoken := -1 // yyrcvr.char translated into internal numbering
+	defer func() {
+		// Make sure we report no lookahead when not parsing.
+		yystate = -1
+		yyrcvr.char = -1
+		yytoken = -1
+	}()
+	yyp := -1
+	goto yystack
+
+ret0:
+	return 0
+
+ret1:
+	return 1
+
+yystack:
+	/* put a state and value onto the stack */
+	if yyDebug >= 4 {
+		__yyfmt__.Printf("char %v in %v\n", yyTokname(yytoken), yyStatname(yystate))
+	}
+
+	yyp++
+	if yyp >= len(yyS) {
+		nyys := make([]yySymType, len(yyS)*2)
+		copy(nyys, yyS)
+		yyS = nyys
+	}
+	yyS[yyp] = yyVAL
+	yyS[yyp].yys = yystate
+
+yynewstate:
+	yyn = int(yyPact[yystate])
+	if yyn <= yyFlag {
+		goto yydefault /* simple state */
+	}
+	if yyrcvr.char < 0 {
+		yyrcvr.char, yytoken = yylex1(yylex, &yyrcvr.lval)
+	}
+	yyn += yytoken
+	if yyn < 0 || yyn >= yyLast {
+		goto yydefault
+	}
+	yyn = int(yyAct[yyn])
+	if int(yyChk[yyn]) == yytoken { /* valid shift */
+		yyrcvr.char = -1
+		yytoken = -1
+		yyVAL = yyrcvr.lval
+		yystate = yyn
+		if Errflag > 0 {
+			Errflag--
+		}
+		goto yystack
+	}
+
+yydefault:
+	/* default state action */
+	yyn = int(yyDef[yystate])
+	if yyn == -2 {
+		if yyrcvr.char < 0 {
+			yyrcvr.char, yytoken = yylex1(yylex, &yyrcvr.lval)
+		}
+
+		/* look through exception table */
+		xi := 0
+		for {
+			if yyExca[xi+0] == -1 && int(yyExca[xi+1]) == yystate {
+				break
+			}
+			xi += 2
+		}
+		for xi += 2; ; xi += 2 {
+			yyn = int(yyExca[xi+0])
+			if yyn < 0 || yyn == yytoken {
+				break
+			}
+		}
+		yyn = int(yyExca[xi+1])
+		if yyn < 0 {
+			goto ret0
+		}
+	}
+	if yyn == 0 {
+		/* error ... attempt to resume parsing */
+		switch Errflag {
+		case 0: /* brand new error */
+			yylex.Error(yyErrorMessage(yystate, yytoken))
+			Nerrs++
+			if yyDebug >= 1 {
+				__yyfmt__.Printf("%s", yyStatname(yystate))
+				__yyfmt__.Printf(" saw %s\n", yyTokname(yytoken))
+			}
+			fallthrough
+
+		case 1, 2: /* incompletely recovered error ... try again */
+			Errflag = 3
+
+			/* find a state where "error" is a legal shift action */
+			for yyp >= 0 {
+				yyn = int(yyPact[yyS[yyp].yys]) + yyErrCode
+				if yyn >= 0 && yyn < yyLast {
+					yystate = int(yyAct[yyn]) /* simulate a shift of "error" */
+					if int(yyChk[yystate]) == yyErrCode {
+						goto yystack
+					}
+				}
+
+				/* the current p has no shift on "error", pop stack */
+				if yyDebug >= 2 {
+					__yyfmt__.Printf("error recovery pops state %d\n", yyS[yyp].yys)
+				}
+				yyp--
+			}
+			/* there is no state on the stack with an error shift ... abort */
+			goto ret1
+
+		case 3: /* no shift yet; clobber input char */
+			if yyDebug >= 2 {
+				__yyfmt__.Printf("error recovery discards %s\n", yyTokname(yytoken))
+			}
+			if yytoken == yyEofCode {
+				goto ret1
+			}
+			yyrcvr.char = -1
+			yytoken = -1
+			goto yynewstate /* try again in the same state */
+		}
+	}
+
+	/* reduction by production yyn */
+	if yyDebug >= 2 {
+		__yyfmt__.Printf("reduce %v in:\n\t%v\n", yyn, yyStatname(yystate))
+	}
+
+	yynt := yyn
+	yypt := yyp
+	_ = yypt // guard against "declared and not used"
+
+	yyp -= int(yyR2[yyn])
+	// yyp is now the index of $0. Perform the default action. Iff the
+	// reduced production is ε, $1 is possibly out of range.
+	if yyp+1 >= len(yyS) {
+		nyys := make([]yySymType, len(yyS)*2)
+		copy(nyys, yyS)
+		yyS = nyys
+	}
+	yyVAL = yyS[yyp+1]
+
+	/* consult goto table to find next state */
+	yyn = int(yyR1[yyn])
+	yyg := int(yyPgo[yyn])
+	yyj := yyg + yyS[yyp].yys + 1
+
+	if yyj >= yyLast {
+		yystate = int(yyAct[yyg])
+	} else {
+		yystate = int(yyAct[yyj])
+		if int(yyChk[yystate]) != -yyn {
+			yystate = int(yyAct[yyg])
+		}
+	}
+	// dummy call; replaced with literal code
+	switch yynt {
+
+	case 1:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:91
+		{
+			fmt.Println("\n[Парсер]: Успешное окончание разбора выражения!")
+		}
+	case 13:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:130
+		{
+			fmt.Println("term -> term + factor")
+		}
+	case 14:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:134
+		{
+			fmt.Println("term -> term - factor")
+		}
+	case 15:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:139
+		{
+			fmt.Println("term -> factor")
+		}
+	case 16:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:146
+		{
+			fmt.Println("factor -> factor * basic_part_ar")
+		}
+	case 17:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:150
+		{
+			fmt.Println("factor -> factor / basic_part_ar")
+		}
+	case 18:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:155
+		{
+			fmt.Println("factor -> basic_part_ar")
+		}
+	case 19:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:162
+		{
+			fmt.Printf("basic_part_ar -> DECIMAL (%d)\n", yyDollar[1].num)
+		}
+	case 20:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:166
+		{
+			fmt.Println("basic_part_ar -> ( term )")
+		}
+	}
+	goto yystack /* stack new state and value */
+}

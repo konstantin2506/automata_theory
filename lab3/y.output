@@ -1,10 +1,343 @@
 
-50 terminals, 2 nonterminals
-1 grammar rules, 0/16000 states
+state 0
+	$accept: .top $end 
+
+	DIGIT_TYPE  shift 7
+	LOGIC_TYPE  shift 8
+	.  error
+
+	top  goto 1
+	statement_list  goto 2
+	statement  goto 3
+	assignment_statement  goto 4
+	left_part_assign  goto 5
+	variable_type  goto 6
+
+state 1
+	$accept:  top.$end 
+
+	$end  accept
+	.  error
+
+
+state 2
+	top:  statement_list.    (1)
+	statement_list:  statement_list.statement 
+
+	DIGIT_TYPE  shift 7
+	LOGIC_TYPE  shift 8
+	.  reduce 1 (src line 89)
+
+	statement  goto 9
+	assignment_statement  goto 4
+	left_part_assign  goto 5
+	variable_type  goto 6
+
+state 3
+	statement_list:  statement.    (2)
+
+	.  reduce 2 (src line 97)
+
+
+state 4
+	statement:  assignment_statement.    (4)
+
+	.  reduce 4 (src line 101)
+
+
+state 5
+	assignment_statement:  left_part_assign.arifmetic_expr STATEMENT_END 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	arifmetic_expr  goto 10
+	term  goto 11
+	factor  goto 12
+	basic_part_ar  goto 13
+
+state 6
+	left_part_assign:  variable_type.name_list ASSIGNMENT_OPERATOR 
+	left_part_assign:  variable_type.name_list dimension ASSIGNMENT_OPERATOR 
+
+	NAME  shift 17
+	.  error
+
+	name_list  goto 16
+
+state 7
+	variable_type:  DIGIT_TYPE.    (8)
+
+	.  reduce 8 (src line 115)
+
+
+state 8
+	variable_type:  LOGIC_TYPE.    (9)
+
+	.  reduce 9 (src line 117)
+
+
+state 9
+	statement_list:  statement_list statement.    (3)
+
+	.  reduce 3 (src line 99)
+
+
+state 10
+	assignment_statement:  left_part_assign arifmetic_expr.STATEMENT_END 
+
+	STATEMENT_END  shift 18
+	.  error
+
+
+state 11
+	arifmetic_expr:  term.    (12)
+	term:  term.PLUS factor 
+	term:  term.MINUS factor 
+
+	PLUS  shift 19
+	MINUS  shift 20
+	.  reduce 12 (src line 125)
+
+
+state 12
+	term:  factor.    (15)
+	factor:  factor.MULT basic_part_ar 
+	factor:  factor.DIV basic_part_ar 
+
+	MULT  shift 21
+	DIV  shift 22
+	.  reduce 15 (src line 138)
+
+
+state 13
+	factor:  basic_part_ar.    (18)
+
+	.  reduce 18 (src line 154)
+
+
+state 14
+	basic_part_ar:  DECIMAL.    (19)
+
+	.  reduce 19 (src line 160)
+
+
+state 15
+	basic_part_ar:  DEFAULT_BRACE_LEFT.term DEFAULT_BRACE_RIGHT 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	term  goto 23
+	factor  goto 12
+	basic_part_ar  goto 13
+
+state 16
+	left_part_assign:  variable_type name_list.ASSIGNMENT_OPERATOR 
+	left_part_assign:  variable_type name_list.dimension ASSIGNMENT_OPERATOR 
+	name_list:  name_list.COMMA NAME 
+
+	SQUARE_BRACE_LEFT  shift 27
+	ASSIGNMENT_OPERATOR  shift 24
+	COMMA  shift 26
+	.  error
+
+	dimension  goto 25
+
+state 17
+	name_list:  NAME.    (10)
+
+	.  reduce 10 (src line 119)
+
+
+state 18
+	assignment_statement:  left_part_assign arifmetic_expr STATEMENT_END.    (5)
+
+	.  reduce 5 (src line 105)
+
+
+state 19
+	term:  term PLUS.factor 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	factor  goto 28
+	basic_part_ar  goto 13
+
+state 20
+	term:  term MINUS.factor 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	factor  goto 29
+	basic_part_ar  goto 13
+
+state 21
+	factor:  factor MULT.basic_part_ar 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	basic_part_ar  goto 30
+
+state 22
+	factor:  factor DIV.basic_part_ar 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	basic_part_ar  goto 31
+
+state 23
+	term:  term.PLUS factor 
+	term:  term.MINUS factor 
+	basic_part_ar:  DEFAULT_BRACE_LEFT term.DEFAULT_BRACE_RIGHT 
+
+	PLUS  shift 19
+	MINUS  shift 20
+	DEFAULT_BRACE_RIGHT  shift 32
+	.  error
+
+
+state 24
+	left_part_assign:  variable_type name_list ASSIGNMENT_OPERATOR.    (6)
+
+	.  reduce 6 (src line 109)
+
+
+state 25
+	left_part_assign:  variable_type name_list dimension.ASSIGNMENT_OPERATOR 
+
+	ASSIGNMENT_OPERATOR  shift 33
+	.  error
+
+
+state 26
+	name_list:  name_list COMMA.NAME 
+
+	NAME  shift 34
+	.  error
+
+
+state 27
+	dimension:  SQUARE_BRACE_LEFT.dimension_inner SQUARE_BRACE_RIGHT 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	arifmetic_expr  goto 36
+	term  goto 11
+	factor  goto 12
+	basic_part_ar  goto 13
+	dimension_inner  goto 35
+
+state 28
+	term:  term PLUS factor.    (13)
+	factor:  factor.MULT basic_part_ar 
+	factor:  factor.DIV basic_part_ar 
+
+	MULT  shift 21
+	DIV  shift 22
+	.  reduce 13 (src line 128)
+
+
+state 29
+	term:  term MINUS factor.    (14)
+	factor:  factor.MULT basic_part_ar 
+	factor:  factor.DIV basic_part_ar 
+
+	MULT  shift 21
+	DIV  shift 22
+	.  reduce 14 (src line 133)
+
+
+state 30
+	factor:  factor MULT basic_part_ar.    (16)
+
+	.  reduce 16 (src line 144)
+
+
+state 31
+	factor:  factor DIV basic_part_ar.    (17)
+
+	.  reduce 17 (src line 149)
+
+
+state 32
+	basic_part_ar:  DEFAULT_BRACE_LEFT term DEFAULT_BRACE_RIGHT.    (20)
+
+	.  reduce 20 (src line 165)
+
+
+state 33
+	left_part_assign:  variable_type name_list dimension ASSIGNMENT_OPERATOR.    (7)
+
+	.  reduce 7 (src line 111)
+
+
+state 34
+	name_list:  name_list COMMA NAME.    (11)
+
+	.  reduce 11 (src line 122)
+
+
+state 35
+	dimension:  SQUARE_BRACE_LEFT dimension_inner.SQUARE_BRACE_RIGHT 
+	dimension_inner:  dimension_inner.COMMA arifmetic_expr 
+
+	SQUARE_BRACE_RIGHT  shift 37
+	COMMA  shift 38
+	.  error
+
+
+state 36
+	dimension_inner:  arifmetic_expr.    (22)
+
+	.  reduce 22 (src line 175)
+
+
+state 37
+	dimension:  SQUARE_BRACE_LEFT dimension_inner SQUARE_BRACE_RIGHT.    (21)
+
+	.  reduce 21 (src line 172)
+
+
+state 38
+	dimension_inner:  dimension_inner COMMA.arifmetic_expr 
+
+	DEFAULT_BRACE_LEFT  shift 15
+	DECIMAL  shift 14
+	.  error
+
+	arifmetic_expr  goto 39
+	term  goto 11
+	factor  goto 12
+	basic_part_ar  goto 13
+
+state 39
+	dimension_inner:  dimension_inner COMMA arifmetic_expr.    (23)
+
+	.  reduce 23 (src line 177)
+
+
+50 terminals, 14 nonterminals
+24 grammar rules, 40/16000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-0 working sets used
-memory: parser 0/240000
-0 extra closures
-0 shift entries, 0 exceptions
-0 goto entries
-0 entries saved by goto default
+63 working sets used
+memory: parser 39/240000
+15 extra closures
+40 shift entries, 1 exceptions
+21 goto entries
+13 entries saved by goto default
+Optimizer space used: output 43/240000
+43 table entries, 2 zero
+maximum spread: 50, maximum offset: 47

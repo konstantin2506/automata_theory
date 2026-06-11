@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"log"
 	"os"
 )
@@ -8,12 +9,17 @@ import (
 func main() {
 	filename := "main.yu"
 
-	content, err := os.ReadFile(filename)
+	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatalf("Ошибка при чтении файла: %s", err)
 	}
+	defer file.Close()
 
-	lexer := NewLexer(content)
+	reader := bufio.NewReader(file)
 
+	lexer := &lexerCtx{
+		src: reader,
+	}
+	lexer.current = lexer.getc()
 	yyParse(lexer)
 }
