@@ -50,8 +50,6 @@ func checkTypesOfParams(got []Variable, want []Variable) error {
 }
 
 func NewFunctionCallNode(function *FunctionDeclNode, paramNodes []AstNode) FunctionCallNode {
-	//TODO wtf with params
-	//
 	return FunctionCallNode{nil, function, paramNodes}
 }
 

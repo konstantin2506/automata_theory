@@ -19,3 +19,7 @@ func (v *Integer) Copy() Variable {
 func NewVariableInt(value int) Variable {
 	return &Integer{value}
 }
+
+func (v *Integer) Data() int {
+	return v.data
+}
