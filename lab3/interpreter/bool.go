@@ -4,8 +4,9 @@ type Boolean struct {
 	data bool
 }
 
-func (v *Boolean) Assign(value bool) {
-	v.data = value
+func (v *Boolean) Assign(right Variable) {
+	rb := right.(*Boolean)
+	v.data = rb.data
 }
 
 func (v *Boolean) Type() VarT {

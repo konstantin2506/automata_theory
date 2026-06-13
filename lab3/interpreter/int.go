@@ -4,8 +4,9 @@ type Integer struct {
 	data int
 }
 
-func (v *Integer) Assign(value int) {
-	v.data = value
+func (v *Integer) Assign(value Variable) {
+	r := value.(*Integer)
+	v.data = r.data
 }
 
 func (v *Integer) Type() VarT {
