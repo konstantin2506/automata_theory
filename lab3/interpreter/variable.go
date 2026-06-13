@@ -8,6 +8,16 @@ const (
 	Array
 )
 
+var typeNames = map[VarT]string{
+	Int:   "Integer",
+	Bool:  "Boolean",
+	Array: "Array",
+}
+
+func TypeName(t VarT) string {
+	return typeNames[t]
+}
+
 type Variable interface {
 	Type() VarT
 	Copy() Variable
