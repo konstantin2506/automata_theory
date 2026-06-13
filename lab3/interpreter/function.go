@@ -10,9 +10,10 @@ const (
 )
 
 var (
-	ErrStackLimit               = errors.New("stack limit got")
-	ErrFunctionParamTypesDiffer = errors.New("param types of function decl and function call differ")
-	ErrFunctionParamCountDiffer = errors.New("param count of function decl and function call differ")
+	ErrStackLimit                = errors.New("stack limit got")
+	ErrFunctionParamTypesDiffer  = errors.New("param types of function decl and function call differ")
+	ErrFunctionParamCountDiffer  = errors.New("param count of function decl and function call differ")
+	ErrFunctionResultTypesDiffer = errors.New("result types of function decl and function call differ")
 )
 
 type AstNode interface {
@@ -24,6 +25,7 @@ type FunctionDeclNode struct {
 	name       string
 	params     []Variable
 	paramNames []string
+	result     Variable
 }
 
 type FunctionCallNode struct {
@@ -76,7 +78,25 @@ func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
 	}
 
 	result, err := fn.function.child.Eval(fn.scope)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	if fn.function.result == nil {
+		if result != nil {
+			return nil, fmt.Errorf("%w: want=None, got=%s", ErrFunctionResultTypesDiffer, TypeName(result.Type()))
+		}
+	} else {
+		if result.Type() != fn.function.result.Type() {
+			return nil, fmt.Errorf("%w: want=%s, got=%s", ErrFunctionResultTypesDiffer, TypeName(fn.function.result.Type()), TypeName(result.Type()))
+		}
+		if vres, ok := fn.function.result.(Vector); ok {
+			if vres.InnerType() != result.(Vector).InnerType() {
+				return nil, fmt.Errorf("%w: want=%s, got=%s", ErrFunctionResultTypesDiffer, TypeName(vres.InnerType()), TypeName(result.(Vector).InnerType()))
+			}
+		}
+	}
+
+	return result, nil
 }
 
 func (fn *FunctionCallNode) SetScope(scope *Scope) {
