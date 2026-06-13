@@ -16,6 +16,10 @@ func (v *Boolean) Copy() Variable {
 	return NewVariableBool(v.data)
 }
 
+func (v *Boolean) Data() bool {
+	return v.data
+}
+
 func NewVariableBool(value bool) Variable {
 	return &Boolean{value}
 }

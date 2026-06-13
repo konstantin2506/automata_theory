@@ -19,15 +19,15 @@ var (
 	ErrZeroDivision        = errors.New("right operand is equal to zero")
 )
 
-var opNames = map[BinIntOpT]string{
+var intBinOpNames = map[BinIntOpT]string{
 	Div: "div",
 	Mul: "mul",
 	Sub: "sub",
 	Add: "add",
 }
 
-func BinOpName(op BinIntOpT) string {
-	return opNames[op]
+func BinIntOpName(op BinIntOpT) string {
+	return intBinOpNames[op]
 }
 
 type BinIntOpNode struct {
@@ -64,11 +64,11 @@ func (node *BinIntOpNode) Eval(scope *Scope) (Variable, error) {
 	}
 	lInt, okLeft := l.(*Integer)
 	if !okLeft {
-		return nil, fmt.Errorf("left %w in %s", ErrOperandIsNotInteger, BinOpName(node.opType))
+		return nil, fmt.Errorf("left %w in %s", ErrOperandIsNotInteger, BinIntOpName(node.opType))
 	}
 	rInt, okRight := r.(*Integer)
 	if !okRight {
-		return nil, fmt.Errorf("right %w in %s", ErrOperandIsNotInteger, BinOpName(node.opType))
+		return nil, fmt.Errorf("right %w in %s", ErrOperandIsNotInteger, BinIntOpName(node.opType))
 	}
 	if rInt.Data() == 0 && node.opType == Div {
 		return nil, ErrZeroDivision
