@@ -12,6 +12,10 @@ func (v *Boolean) Type() VarT {
 	return Bool
 }
 
+func (v *Boolean) Copy() Variable {
+	return NewVariableBool(v.data)
+}
+
 func NewVariableBool(value bool) Variable {
 	return &Boolean{value}
 }

@@ -12,6 +12,10 @@ func (v *Integer) Type() VarT {
 	return Int
 }
 
+func (v *Integer) Copy() Variable {
+	return NewVariableInt(v.data)
+}
+
 func NewVariableInt(value int) Variable {
 	return &Integer{value}
 }

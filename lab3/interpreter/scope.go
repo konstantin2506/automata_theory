@@ -7,6 +7,7 @@ import (
 )
 
 type Scope struct {
+	parent    *Scope
 	variables map[string]Variable
 }
 
@@ -14,108 +15,106 @@ var (
 	ErrVarDoubleDeclaration = errors.New("double declaration of variable")
 	ErrVarNotDeclared       = errors.New("double declaration of variable")
 	ErrVarInvalidType       = errors.New("invalid type of variable")
+	ErrNotAVectorType       = errors.New("not a vector type")
+	ErrNotAScalarType       = errors.New("not a scalar type")
 )
 
-func (scope *Scope) CheckVarExistance(varName string) (bool, error) {
-	_, ok := scope.variables[varName]
+func NewScope(parent *Scope) Scope {
+	return Scope{parent, make(map[string]Variable)}
+}
+
+func (scope *Scope) FindVariableDepth(varName string) (Variable, error) {
+	variable, ok := scope.variables[varName]
 	if ok {
-		return true, fmt.Errorf("%w: '%s'", ErrVarDoubleDeclaration, varName)
+		return variable, nil
 	}
-	return false, fmt.Errorf("%w: '%s'", ErrVarNotDeclared, varName)
+	if scope.parent == nil {
+		return nil, fmt.Errorf("%w: '%s'", ErrVarNotDeclared, varName)
+	}
+	upperVar, err := scope.parent.parent.FindVariableDepth(varName)
+
+	return upperVar, err
+}
+
+func (scope *Scope) CheckDoubleDecl(varName string) error {
+	_, ok := scope.variables[varName]
+	if !ok {
+		return fmt.Errorf("%w: '%s'", ErrVarDoubleDeclaration, varName)
+	}
+
+	return nil
+}
+
+func (scope *Scope) ConstructCopy(varName string, value Variable) error {
+	err := scope.CheckDoubleDecl(varName)
+	if err != nil {
+		return fmt.Errorf("construct copy (%s) error: %w", varName, err)
+	}
+	scope.variables[varName] = value.Copy()
+	return nil
 }
 
 func (scope *Scope) ConstructInt(varName string, value int) error {
-	_, err := scope.CheckVarExistance(varName)
+	err := scope.CheckDoubleDecl(varName)
 	if err != nil {
-		return fmt.Errorf("construct Int error: %w", err)
+		return fmt.Errorf("construct Int (%s) error: %w", varName, err)
 	}
 	scope.variables[varName] = NewVariableInt(value)
 	return nil
 }
 
 func (scope *Scope) ConstructBool(varName string, value bool) error {
-	_, err := scope.CheckVarExistance(varName)
+	err := scope.CheckDoubleDecl(varName)
 	if err != nil {
-		return fmt.Errorf("construct Bool error: %w", err)
+		return fmt.Errorf("construct Bool (%s) error: %w", varName, err)
 	}
 	scope.variables[varName] = NewVariableBool(value)
 	return nil
 }
 
-func (scope *Scope) ConstructBoolArray(varName string, sizes []int, value bool) error {
-	_, err := scope.CheckVarExistance(varName)
+func (scope *Scope) ConstructArray(varName string, sizes []int, value Variable) error {
+	err := scope.CheckDoubleDecl(varName)
 	if err != nil {
-		return fmt.Errorf("construct BoolArray error: %w", err)
+		return fmt.Errorf("construct Array (%s) error: %w", varName, err)
 	}
-	boolArray, err := NewBoolArray(sizes, value)
+	array, err := NewArray(sizes, value)
 	if err != nil {
-		return fmt.Errorf("construct BoolArray error: %w", err)
+		return fmt.Errorf("construct Array (%s) error: %w", varName, err)
 	}
-	scope.variables[varName] = boolArray
+	scope.variables[varName] = array
 	return nil
 }
 
-func (scope *Scope) ConstructIntArray(varName string, sizes []int, value int) error {
-	_, err := scope.CheckVarExistance(varName)
+func (scope *Scope) AssignScalar(varName string, value Variable) error {
+	v, err := scope.FindVariableDepth(varName)
 	if err != nil {
-		return fmt.Errorf("construct IntArray error: %w", err)
+		return fmt.Errorf("assign scalar (%s) error: %w", varName, err)
 	}
-	intArray, err := NewIntArray(sizes, value)
+	if v.Type() != value.Type() {
+		return fmt.Errorf("assign scalar (%s) error: %w", varName, ErrVarInvalidType)
+	}
+	scalar, ok := v.(Scalar)
+	if !ok {
+		return fmt.Errorf("assign Array (%s) error: %w", varName, ErrNotAScalarType)
+	}
+
+	scalar.Assign(value)
+	return nil
+}
+
+func (scope *Scope) AssignVector(varName string, indices []int, value Variable) error {
+	v, err := scope.FindVariableDepth(varName)
 	if err != nil {
-		return fmt.Errorf("construct IntArray error: %w", err)
+		return fmt.Errorf("assign Array (%s) error: %w", varName, err)
 	}
-	scope.variables[varName] = intArray
-	return nil
-}
+	vec, ok := v.(Vector)
+	if !ok {
+		return fmt.Errorf("assign Array (%s) error: %w", varName, ErrNotAVectorType)
+	}
+	if !CmpTypeWithInner(vec, value) {
+		return fmt.Errorf("assign Array (%s) error: %w", varName, ErrVarInvalidType)
+	}
 
-func (scope *Scope) AssignInt(varName string, value int) error {
-	exists, err := scope.CheckVarExistance(varName)
-	if !exists {
-		return fmt.Errorf("assign int error: %w", err)
-	}
-	v := scope.variables[varName]
-	if v.Type() != Int {
-		return fmt.Errorf("assign int error: %w", ErrVarInvalidType)
-	}
-	v.(*Integer).Assign(value)
-	return nil
-}
-
-func (scope *Scope) AssignBool(varName string, value bool) error {
-	exists, err := scope.CheckVarExistance(varName)
-	if !exists {
-		return fmt.Errorf("assign bool error: %w", err)
-	}
-	v := scope.variables[varName]
-	if v.Type() != Bool {
-		return fmt.Errorf("assign bool error: %w", ErrVarInvalidType)
-	}
-	v.(*Boolean).Assign(value)
-	return nil
-}
-
-func (scope *Scope) AssignBoolArray(varName string, indices []int, value bool) error {
-	exists, err := scope.CheckVarExistance(varName)
-	if !exists {
-		return fmt.Errorf("assign BoolArray error: %w", err)
-	}
-	v := scope.variables[varName]
-	if v.Type() != Bool {
-		return fmt.Errorf("assign BoolArray error: %w", ErrVarInvalidType)
-	}
-	err = v.(*VarArray[bool]).Assign(indices, value)
-	return err
-}
-
-func (scope *Scope) AssignIntArray(varName string, indices []int, value int) error {
-	exists, err := scope.CheckVarExistance(varName)
-	if !exists {
-		return fmt.Errorf("assign IntArray error: %w", err)
-	}
-	v := scope.variables[varName]
-	if v.Type() != Int {
-		return fmt.Errorf("assign IntArray error: %w", ErrVarInvalidType)
-	}
-	err = v.(*VarArray[int]).Assign(indices, value)
+	err = vec.Assign(indices, value)
 	return err
 }

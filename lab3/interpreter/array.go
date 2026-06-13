@@ -6,18 +6,30 @@ import (
 )
 
 var (
-	ErrArraySizes      = errors.New("array sizes are incorrect")
-	ErrArrayIndices    = errors.New("array indices count differ")
-	ErrArrayOutOfRange = errors.New("array index is out of range")
+	ErrArraySizes             = errors.New("array sizes are incorrect")
+	ErrArrayIndices           = errors.New("array indices count differ")
+	ErrArrayOutOfRange        = errors.New("array index is out of range")
+	ErrArrayAssignTypesDiffer = errors.New("array assign types differ")
 )
 
-type VarArray[T any] struct {
+type VarArray struct {
 	sizes []int
-	data  []T
+	data  []Variable
 	dataT VarT
 }
 
-func (v *VarArray[T]) Assign(indices []int, value T) error {
+func CmpTypeWithInner(vector Vector, value Variable) bool {
+	return vector.InnerType() == value.Type()
+}
+
+func (v *VarArray) InnerType() VarT {
+	return v.dataT
+}
+
+func (v *VarArray) Assign(indices []int, value Variable) error {
+	if !CmpTypeWithInner(v, value) {
+		return fmt.Errorf("%w: want: %d, got: %d", ErrArrayAssignTypesDiffer, v.dataT, value.Type())
+	}
 	if len(indices) != len(v.sizes) {
 		return fmt.Errorf("%w: sizes: %d, indices: %d", ErrArrayIndices, len(v.sizes), len(indices))
 	}
@@ -36,11 +48,11 @@ func (v *VarArray[T]) Assign(indices []int, value T) error {
 	return nil
 }
 
-func (v *VarArray[T]) Type() VarT {
-	return v.dataT
+func (v *VarArray) Type() VarT {
+	return Array
 }
 
-func newVariableArray[T any](sizes []int, value T, dataT VarT) (*VarArray[T], error) {
+func NewArray(sizes []int, value Variable) (Variable, error) {
 	if sizes[0] == 0 {
 		return nil, fmt.Errorf("%w: first size of array is 0", ErrArraySizes)
 	}
@@ -54,26 +66,20 @@ func newVariableArray[T any](sizes []int, value T, dataT VarT) (*VarArray[T], er
 	}
 	sizesCopy := make([]int, len(sizes))
 	copy(sizesCopy, sizes)
-	data := make([]T, dataSize)
+	data := make([]Variable, dataSize)
 	for i := range dataSize {
-		data[i] = value
+		data[i] = value.Copy()
 	}
-	v := &VarArray[T]{sizesCopy, data, dataT}
+	v := &VarArray{sizesCopy, data, value.Type()}
 	return v, nil
 }
 
-func NewBoolArray(sizes []int, value bool) (Variable, error) {
-	arr, err := newVariableArray(sizes, value, Bool)
-	if err != nil {
-		return nil, err
+func (v *VarArray) Copy() Variable {
+	newData := make([]Variable, len(v.data))
+	newSizes := make([]int, len(v.sizes))
+	for i := range len(newData) {
+		newData[i] = v.data[i].Copy()
 	}
-	return arr, err
-}
-
-func NewIntArray(sizes []int, value int) (Variable, error) {
-	arr, err := newVariableArray(sizes, value, Int)
-	if err != nil {
-		return nil, err
-	}
-	return arr, err
+	copy(newSizes, v.sizes)
+	return &VarArray{newSizes, newData, v.dataT}
 }
