@@ -10,14 +10,24 @@ const (
 	lte
 	gt
 	gte
+	eqMap
+	ltMap
+	lteMap
+	gtMap
+	gteMap
 )
 
 var compareNames = map[compT]string{
-	eq:  "==",
-	lt:  "<",
-	lte: "<=",
-	gt:  ">",
-	gte: ">=",
+	eq:     "eq",
+	lt:     "lt",
+	lte:    "lte",
+	gt:     "gt",
+	gte:    "gte",
+	eqMap:  "eq[]",
+	ltMap:  "lt[]",
+	lteMap: "lte[]",
+	gtMap:  "gt[]",
+	gteMap: "gte[]",
 }
 
 func CompareName(x compT) string {
@@ -26,41 +36,56 @@ func CompareName(x compT) string {
 
 type CompareNode struct {
 	left      AstNode
-	right     AstNode
 	predicate func(int, int) bool
 	compType  compT
+	mapped    bool
 }
 
-func NewEqNode(left, right AstNode) AstNode {
-	return &CompareNode{left, right, func(l, r int) bool { return l == r }, eq}
+func NewEqReduceNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l == r }, eq, false}
 }
 
-func NewLtNode(left, right AstNode) AstNode {
-	return &CompareNode{left, right, func(l, r int) bool { return l < r }, lt}
+func NewLtReduceNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l < r }, lt, false}
 }
 
-func NewLteNode(left, right AstNode) AstNode {
-	return &CompareNode{left, right, func(l, r int) bool { return l <= r }, lte}
+func NewLteReduceNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l <= r }, lte, false}
 }
 
-func NewGtNode(left, right AstNode) AstNode {
-	return &CompareNode{left, right, func(l, r int) bool { return l > r }, gt}
+func NewGtReduceNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l > r }, gt, false}
 }
 
-func NewGteNode(left, right AstNode) AstNode {
-	return &CompareNode{left, right, func(l, r int) bool { return l >= r }, gte}
+func NewGteReduceNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l >= r }, gte, false}
 }
 
-func CompReduce(v, other *VarArray, predicate func(int, int) bool) (Variable, error) {
-	err := v.CmpTypeWith(other)
-	if err != nil {
-		return nil, err
-	}
+func NewEqMapNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l == r }, eq, true}
+}
+
+func NewLtMapNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l < r }, lt, true}
+}
+
+func NewLteMapNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l <= r }, lte, true}
+}
+
+func NewGtMapNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l > r }, gt, true}
+}
+
+func NewGteMapNode(left, right AstNode) AstNode {
+	return &CompareNode{left, func(l, r int) bool { return l >= r }, gte, true}
+}
+
+func CompReduce(v *VarArray, predicate func(int, int) bool) (Variable, error) {
 	trueCount := 0
 	for i := range v.data {
 		l := (v.data[i]).(*Integer)
-		r := (other.data[i]).(*Integer)
-		resBool := predicate(l.Data(), r.Data())
+		resBool := predicate(l.Data(), 0)
 		if resBool {
 			trueCount++
 		}
@@ -72,11 +97,7 @@ func CompReduce(v, other *VarArray, predicate func(int, int) bool) (Variable, er
 	return NewVariableBool(false), nil
 }
 
-func CompMap(v, other *VarArray, predicate func(int, int) bool) (Variable, error) {
-	err := v.CmpTypeWith(other)
-	if err != nil {
-		return nil, err
-	}
+func CompMap(v *VarArray, predicate func(int, int) bool) (Variable, error) {
 	res, err := NewArray(v.sizes, NewVariableBool(false))
 	if err != nil {
 		return nil, err
@@ -84,8 +105,7 @@ func CompMap(v, other *VarArray, predicate func(int, int) bool) (Variable, error
 
 	for i := range v.data {
 		l := (v.data[i]).(*Integer)
-		r := (other.data[i]).(*Integer)
-		resBool := predicate(l.Data(), r.Data())
+		resBool := predicate(l.Data(), 0)
 		res.(*VarArray).data[i] = NewVariableBool(resBool)
 	}
 
@@ -97,18 +117,21 @@ func (node *CompareNode) Eval(scope *Scope) (Variable, error) {
 	if err != nil {
 		return nil, err
 	}
-	r, err := node.right.Eval(scope)
-	if err != nil {
-		return nil, err
+
+	lArr, okLarr := l.(*VarArray)
+	if okLarr && lArr.InnerType() == Int {
+		switch node.mapped {
+		case true:
+			return CompMap(lArr, node.predicate)
+		case false:
+			return CompReduce(lArr, node.predicate)
+		}
 	}
+
 	lInt, okLeft := l.(*Integer)
 	if !okLeft {
 		return nil, fmt.Errorf("left %w in %s", ErrOperandIsNotBoolean, CompareName(node.compType))
 	}
-	rInt, okRight := r.(*Integer)
-	if !okRight {
-		return nil, fmt.Errorf("right %w in %s", ErrOperandIsNotBoolean, CompareName(node.compType))
-	}
-	result := node.predicate(lInt.Data(), rInt.Data())
+	result := node.predicate(lInt.Data(), 0)
 	return NewVariableBool(result), nil
 }
