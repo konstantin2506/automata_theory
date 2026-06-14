@@ -1,5 +1,7 @@
 package interpreter
 
+import "fmt"
+
 type Integer struct {
 	data int
 }
@@ -7,6 +9,10 @@ type Integer struct {
 func (v *Integer) Assign(value Variable) {
 	r := value.(*Integer)
 	v.data = r.data
+}
+
+func (v *Integer) Print() {
+	fmt.Printf("%d", v.data)
 }
 
 func (v *Integer) Type() VarT {

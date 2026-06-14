@@ -23,6 +23,7 @@ check_dependency "$GOYACC"
 # Проверка успешности генерации
 if [ $? -eq 0 ]; then
     echo "Success"
+    go run .
 else
     echo "Error while generating" >&2
     exit 1

@@ -1,5 +1,7 @@
 package interpreter
 
+import "fmt"
+
 type Boolean struct {
 	data bool
 }
@@ -7,6 +9,10 @@ type Boolean struct {
 func (v *Boolean) Assign(right Variable) {
 	rb := right.(*Boolean)
 	v.data = rb.data
+}
+
+func (v *Boolean) Print() {
+	fmt.Printf("%t", v.data)
 }
 
 func (v *Boolean) Type() VarT {

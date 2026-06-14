@@ -5,9 +5,11 @@ package main
 import (
 	"strconv"
     "bufio"
-    intr "interpreter"
 )
 
+import (
+    intr "lab3/interpreter"
+)
 
 type lexerCtx struct{
     src *bufio.Reader
@@ -60,7 +62,8 @@ D [0-9]+
     yyLval.boolean = false
     return FALSE
 
-
+"print"
+    return PRINT
 
 "to_logic" return TO_LOGIC_CAST
 "to_digit" return TO_DIGIT_CAST
@@ -75,10 +78,10 @@ D [0-9]+
 ")" return DEFAULT_BRACE_RIGHT
 
 "digit"
-    yyLval.dType = Int
+    yyLval.dType = intr.Int
     return DIGIT_TYPE
 "logic"
-    yyLval.dType = Bool
+    yyLval.dType = intr.Bool
     return LOGIC_TYPE
 
 "=" return ASSIGNMENT_OPERATOR

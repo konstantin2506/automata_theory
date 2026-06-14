@@ -19,6 +19,18 @@ type VarArray struct {
 	dataT VarT
 }
 
+func (v *VarArray) Print() {
+	fmt.Printf("%s_arr", TypeName(v.dataT))
+	for _, size := range v.sizes {
+		fmt.Printf("[%d]", size)
+	}
+	fmt.Printf("={")
+	for _, elem := range v.data {
+		elem.(Printer).Print()
+	}
+	fmt.Printf("}")
+}
+
 func CmpTypeWithInner(vector Vector, value Variable) bool {
 	return vector.InnerType() == value.Type()
 }

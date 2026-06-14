@@ -1,2 +1,5 @@
-digit a, b [1 + 2,2,3] = 1 + ((2 + 3 / 4 * 5));
-logic c = 2 + 2;
+logic abv_222 = false;
+logic b = true;
+logic e = true && b && true;
+digit a = 3;
+print(1 && false);

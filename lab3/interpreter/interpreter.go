@@ -7,12 +7,16 @@ import (
 
 type Interpreter struct {
 	root        AstNode
-	globalScope Scope
+	globalScope *Scope
 	CallStack
 }
 
-func NewInterpreter(treeRoot AstNode) Interpreter {
-	return Interpreter{treeRoot, NewScope(nil), NewCallStack()}
+func NewInterpreter(treeRoot AstNode) *Interpreter {
+	globalScope := NewScope(nil)
+
+	intr := &Interpreter{treeRoot, &globalScope, NewCallStack()}
+	intr.scopeStack = append(intr.scopeStack, &globalScope)
+	return intr
 }
 
 func interpretRec(intr *Interpreter, node AstNode) (Variable, error) {
@@ -34,7 +38,8 @@ func interpretRec(intr *Interpreter, node AstNode) (Variable, error) {
 func Interpret(intr *Interpreter) {
 	_, err := interpretRec(intr, intr.root)
 	if err != nil {
-		fmt.Printf("program finished with error: %s\n", err.Error())
+		fmt.Printf("[Yucky]: program finished with error: %s\n", err.Error())
+		return
 	}
-	fmt.Printf("program finished without errors\n")
+	fmt.Printf("[Yucky]: program finished without errors\n")
 }

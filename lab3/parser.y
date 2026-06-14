@@ -5,10 +5,10 @@ package main
 import (
 	"fmt"
 	"os"
-    intr "interpreter"
+    intr "lab3/interpreter"
 )
-var __rootAST AstNode = nil
-func GetRoot() AstNode{
+var __rootAST intr.AstNode = nil
+func GetRoot() intr.AstNode{
     return __rootAST
 }
 %}
@@ -22,6 +22,7 @@ func GetRoot() AstNode{
     nodeList []intr.AstNode
 }
 
+%token PRINT
 
 %token PLUS
 %token MINUS
@@ -92,19 +93,15 @@ func GetRoot() AstNode{
 %token <num> OCTAL;
 %token <num> DECIMAL;
 
-%type <node> statement
-
+%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement
+%type <dType> variable_type
 %%
 
 top:
     statement_list
     {
-        root := intr.NewStatementListNode()
-        for _, statement := range $1.([]intr.AstNode){
-            root.PushStatement(statement)
-        }
-        __rootAST = root
-        fmt.Println("\n[Парсер]: Успешное окончание разбора выражения!")
+        __rootAST = $1
+        fmt.Println("\n[Parser]: AstPart=ok")
     }
 ;
 
@@ -112,25 +109,37 @@ top:
 statement_list:
     statement
     {
-        statements := NewStatementListNode()
-        statements.PushStatement($1.(intr.AstNode))
+        statements := intr.NewStatementListNode()
+        statements.PushStatement($1)
         $$ = statements
     }
 |   statement_list statement
     {
-        statements := $1.(*StatementListNode)
-        statements.PushStatement($1.(intr.AstNode))
+        statements := $1.(*intr.StatementListNode)
+        statements.PushStatement($2)
         $$ = statements
     }
 ;
 statement:
     variable_init_statement
-;
-
-variable_init_statement:
-    variable_type name_list ASSIGNMENT_OPERATOR arifmetic_expr STATEMENT_END
     {
-        $$ = NewAssignNode()
+        $$ = $1 
+    }
+|   print_statement    
+    {
+        $$ = $1
+    }
+;
+print_statement:
+    PRINT DEFAULT_BRACE_LEFT expr DEFAULT_BRACE_RIGHT STATEMENT_END
+    {
+        $$ = intr.NewPrintNode($3)
+    }
+;
+variable_init_statement:
+    variable_type NAME ASSIGNMENT_OPERATOR expr STATEMENT_END
+    {
+        $$ = intr.NewScalarDeclNode($2, $4, $1)
     }
 ;
 
@@ -146,16 +155,11 @@ variable_type:
         $$ = $1
     }
 
-name_list:
-    NAME
-    {
-        $$ = NewNameNode($1)
-    }
-
-|   
 ;
 
-arifmetic_expr:
+  
+
+expr:
     term
     {
         $$ = $1
@@ -164,11 +168,11 @@ arifmetic_expr:
 term:
     term PLUS factor
     {
-        $$ = NewAddNode($1, $3)
+        $$ = intr.NewAddNode($1, $3)
     }
 |   term MINUS factor
     {
-        $$ = NewSubNode($1, $3)
+        $$ = intr.NewSubNode($1, $3)
     }
 
 |   factor
@@ -180,12 +184,16 @@ term:
 factor:
     factor MULT basic_part_ar
     {
-        $$ = NewMulNode($1, $3)
+        $$ = intr.NewMulNode($1, $3)
 
     }
 |    factor DIV basic_part_ar
     {
-        $$ = NewDivNode($1, $3)
+        $$ = intr.NewDivNode($1, $3)
+    }
+|   factor AND basic_part_ar
+    {
+        $$ = intr.NewAndNode($1, $3)
     }
 
 |   basic_part_ar
@@ -195,24 +203,30 @@ factor:
 ;
 
 basic_part_ar:
-    DECIMAL
+    TRUE
     {
-        $$ = NewIntegerNode($1)
+        $$ = intr.NewBooleanNode($1)
+    }
+|   FALSE
+    {
+        $$ = intr.NewBooleanNode($1)
+    }
+|   DECIMAL
+    {
+        $$ = intr.NewIntegerNode($1)
+        
     }
 |   DEFAULT_BRACE_LEFT term DEFAULT_BRACE_RIGHT
     {
         $$ = $2
     }
-
+|   NAME 
+    {
+        $$ = intr.NewNameNode($1)
+    }
 ;
 
-dimension:
-    SQUARE_BRACE_LEFT dimension_inner SQUARE_BRACE_RIGHT
-;
-dimension_inner:
-    arifmetic_expr
-|   dimension_inner COMMA arifmetic_expr
-;    
+   
 
 
 %%

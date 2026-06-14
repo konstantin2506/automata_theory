@@ -13,7 +13,7 @@ type Scope struct {
 
 var (
 	ErrVarDoubleDeclaration = errors.New("double declaration of variable")
-	ErrVarNotDeclared       = errors.New("double declaration of variable")
+	ErrVarNotDeclared       = errors.New("variable not declared")
 	ErrVarInvalidType       = errors.New("invalid type of variable")
 	ErrNotAVectorType       = errors.New("not a vector type")
 	ErrNotAScalarType       = errors.New("not a scalar type")
@@ -38,7 +38,7 @@ func (scope *Scope) FindVariableDepth(varName string) (Variable, error) {
 
 func (scope *Scope) CheckDoubleDecl(varName string) error {
 	_, ok := scope.variables[varName]
-	if !ok {
+	if ok {
 		return fmt.Errorf("%w: '%s'", ErrVarDoubleDeclaration, varName)
 	}
 

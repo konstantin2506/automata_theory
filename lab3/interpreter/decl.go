@@ -7,17 +7,17 @@ import (
 
 var ErrScalarDeclTypesDiffer = errors.New("scalar decl types differ")
 
-type DeclScalarNode struct {
+type ScalarDeclNode struct {
 	name   string
 	value  AstNode
 	innerT VarT
 }
 
-func NewDeclScalarNode(name string, value AstNode, innerT VarT) *DeclScalarNode {
-	return &DeclScalarNode{name, value, innerT}
+func NewScalarDeclNode(name string, value AstNode, innerT VarT) *ScalarDeclNode {
+	return &ScalarDeclNode{name, value, innerT}
 }
 
-func (node *DeclScalarNode) Eval(scope *Scope) (Variable, error) {
+func (node *ScalarDeclNode) Eval(scope *Scope) (Variable, error) {
 	v, err := node.value.Eval(scope)
 	if err != nil {
 		return nil, err
@@ -25,12 +25,12 @@ func (node *DeclScalarNode) Eval(scope *Scope) (Variable, error) {
 	if node.innerT != v.Type() {
 		return nil, fmt.Errorf("%w: want=%s, got=%s", ErrScalarDeclTypesDiffer, TypeName(node.innerT), TypeName(v.Type()))
 	}
+
 	err = scope.ConstructScalar(node.name, v)
 	if err != nil {
 		return nil, err
 	}
-	constructed, _ := scope.FindVariableDepth(node.name)
-	return constructed, nil
+	return nil, nil
 }
 
 type ArrayDeclNode struct {
@@ -56,7 +56,6 @@ func (node *ArrayDeclNode) Eval(scope *Scope) (Variable, error) {
 	if err != nil {
 		return nil, err
 	}
-	constructed, _ := scope.FindVariableDepth(node.name)
 
-	return constructed, nil
+	return nil, nil
 }

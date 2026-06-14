@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
+
+	intr "lab3/interpreter"
 )
 
 func main() {
@@ -22,4 +25,12 @@ func main() {
 	}
 	lexer.current = lexer.getc()
 	yyParse(lexer)
+	astRoot := GetRoot()
+	if astRoot == nil {
+		fmt.Printf("nil root\n")
+		return
+	}
+
+	interpreter := intr.NewInterpreter(astRoot)
+	intr.Interpret(interpreter)
 }
