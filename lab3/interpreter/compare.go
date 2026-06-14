@@ -51,6 +51,47 @@ func NewGteNode(left, right AstNode) AstNode {
 	return &CompareNode{left, right, func(l, r int) bool { return l >= r }, gte}
 }
 
+func CompReduce(v, other *VarArray, predicate func(int, int) bool) (Variable, error) {
+	err := v.CmpTypeWith(other)
+	if err != nil {
+		return nil, err
+	}
+	trueCount := 0
+	for i := range v.data {
+		l := (v.data[i]).(*Integer)
+		r := (other.data[i]).(*Integer)
+		resBool := predicate(l.Data(), r.Data())
+		if resBool {
+			trueCount++
+		}
+	}
+	if trueCount > len(v.data)/2 {
+		return NewVariableBool(true), nil
+	}
+
+	return NewVariableBool(false), nil
+}
+
+func CompMap(v, other *VarArray, predicate func(int, int) bool) (Variable, error) {
+	err := v.CmpTypeWith(other)
+	if err != nil {
+		return nil, err
+	}
+	res, err := NewArray(v.sizes, NewVariableBool(false))
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range v.data {
+		l := (v.data[i]).(*Integer)
+		r := (other.data[i]).(*Integer)
+		resBool := predicate(l.Data(), r.Data())
+		res.(*VarArray).data[i] = NewVariableBool(resBool)
+	}
+
+	return res, nil
+}
+
 func (node *CompareNode) Eval(scope *Scope) (Variable, error) {
 	l, err := node.left.Eval(scope)
 	if err != nil {

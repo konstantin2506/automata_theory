@@ -53,6 +53,20 @@ func NewAddNode(left, right AstNode) AstNode {
 	return &BinIntOpNode{left, right, func(l, r int) int { return l + r }, Add}
 }
 
+func IntOp(v, other *VarArray, predicate func(int, int) int) (Variable, error) {
+	err := v.CmpTypeWith(other)
+	if err != nil {
+		return nil, err
+	}
+	vcpy := v.Copy()
+	for i := range v.data {
+		l := (vcpy.(*VarArray).data[i]).(*Integer)
+		r := (other.data[i]).(*Integer)
+		l.Assign(NewVariableInt(predicate(l.Data(), r.Data())))
+	}
+	return vcpy, nil
+}
+
 func (node *BinIntOpNode) Eval(scope *Scope) (Variable, error) {
 	l, err := node.left.Eval(scope)
 	if err != nil {
@@ -62,6 +76,12 @@ func (node *BinIntOpNode) Eval(scope *Scope) (Variable, error) {
 	if err != nil {
 		return nil, err
 	}
+	lArr, okLarr := l.(*VarArray)
+	rArr, okRarr := r.(*VarArray)
+	if okLarr && okLarr == okRarr && lArr.InnerType() == Int {
+		return IntOp(lArr, rArr, node.predicate)
+	}
+
 	lInt, okLeft := l.(*Integer)
 	if !okLeft {
 		return nil, fmt.Errorf("left %w in %s", ErrOperandIsNotInteger, BinIntOpName(node.opType))

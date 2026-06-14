@@ -10,6 +10,7 @@ var (
 	ErrArrayIndices           = errors.New("array indices count differ")
 	ErrArrayOutOfRange        = errors.New("array index is out of range")
 	ErrArrayAssignTypesDiffer = errors.New("array assign types differ")
+	ErrArrayDimsDiffer        = errors.New("array dims differ")
 )
 
 type VarArray struct {
@@ -26,12 +27,30 @@ func (v *VarArray) InnerType() VarT {
 	return v.dataT
 }
 
+func (v *VarArray) CmpTypeWith(other *VarArray) error {
+	if !CmpTypeWithInner(v, other.data[0]) {
+		return fmt.Errorf("%w: want: %d, got: %d", ErrArrayAssignTypesDiffer, v.dataT, other.InnerType())
+	}
+	if len(v.sizes) != len(other.sizes) {
+		return fmt.Errorf("%w: sizes: %d, other: %d", ErrArrayIndices, len(v.sizes), len(other.sizes))
+	}
+	for j, size := range v.sizes {
+		if size != other.sizes[j] {
+			return ErrArrayDimsDiffer
+		}
+	}
+	return nil
+}
+
 func (v *VarArray) Assign(indices []int, value Variable) error {
 	if !CmpTypeWithInner(v, value) {
 		return fmt.Errorf("%w: want: %d, got: %d", ErrArrayAssignTypesDiffer, v.dataT, value.Type())
 	}
 	if len(indices) != len(v.sizes) {
 		return fmt.Errorf("%w: sizes: %d, indices: %d", ErrArrayIndices, len(v.sizes), len(indices))
+	}
+	for i := range indices { // indexing from 1
+		indices[i] = indices[i] - 1
 	}
 
 	resultIndex := indices[len(indices)-1]

@@ -38,6 +38,20 @@ func NewOrNode(left, right AstNode) AstNode {
 	return &BinBoolOpNode{left, right, func(l, r bool) bool { return l || r }, Or}
 }
 
+func BoolOp(v, other *VarArray, predicate func(bool, bool) bool) (Variable, error) {
+	err := v.CmpTypeWith(other)
+	if err != nil {
+		return nil, err
+	}
+	vcpy := v.Copy()
+	for i := range v.data {
+		l := (vcpy.(*VarArray).data[i]).(*Boolean)
+		r := (other.data[i]).(*Boolean)
+		l.Assign(NewVariableBool(predicate(l.Data(), r.Data())))
+	}
+	return vcpy, nil
+}
+
 func (node *BinBoolOpNode) Eval(scope *Scope) (Variable, error) {
 	l, err := node.left.Eval(scope)
 	if err != nil {
@@ -47,6 +61,12 @@ func (node *BinBoolOpNode) Eval(scope *Scope) (Variable, error) {
 	if err != nil {
 		return nil, err
 	}
+	lArr, okLarr := l.(*VarArray)
+	rArr, okRarr := r.(*VarArray)
+	if okLarr && okLarr == okRarr && lArr.InnerType() == Bool {
+		return BoolOp(lArr, rArr, node.predicate)
+	}
+
 	lBool, okLeft := l.(*Boolean)
 	if !okLeft {
 		return nil, fmt.Errorf("left %w in %s", ErrOperandIsNotBoolean, BinOpName(node.opType))
