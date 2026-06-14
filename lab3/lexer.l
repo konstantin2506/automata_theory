@@ -5,6 +5,7 @@ package main
 import (
 	"strconv"
     "bufio"
+    intr "interpreter"
 )
 
 
@@ -52,8 +53,12 @@ D [0-9]+
 "*" return MULT
 "/" return DIV
 
-"true" return TRUE
-"false" return FALSE
+"true"
+    yyLval.boolean = true
+    return TRUE
+"false"
+    yyLval.boolean = false
+    return FALSE
 
 
 
@@ -69,8 +74,12 @@ D [0-9]+
 "(" return DEFAULT_BRACE_LEFT
 ")" return DEFAULT_BRACE_RIGHT
 
-"digit" return DIGIT_TYPE
-"logic" return LOGIC_TYPE
+"digit"
+    yyLval.dType = Int
+    return DIGIT_TYPE
+"logic"
+    yyLval.dType = Bool
+    return LOGIC_TYPE
 
 "=" return ASSIGNMENT_OPERATOR
 

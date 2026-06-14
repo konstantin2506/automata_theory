@@ -54,21 +54,12 @@ func (scope *Scope) ConstructCopy(varName string, value Variable) error {
 	return nil
 }
 
-func (scope *Scope) ConstructInt(varName string, value int) error {
+func (scope *Scope) ConstructScalar(varName string, value Variable) error {
 	err := scope.CheckDoubleDecl(varName)
 	if err != nil {
-		return fmt.Errorf("construct Int (%s) error: %w", varName, err)
+		return fmt.Errorf("construct %s (%s) error: %w", TypeName(value.Type()), varName, err)
 	}
-	scope.variables[varName] = NewVariableInt(value)
-	return nil
-}
-
-func (scope *Scope) ConstructBool(varName string, value bool) error {
-	err := scope.CheckDoubleDecl(varName)
-	if err != nil {
-		return fmt.Errorf("construct Bool (%s) error: %w", varName, err)
-	}
-	scope.variables[varName] = NewVariableBool(value)
+	scope.variables[varName] = value.Copy()
 	return nil
 }
 

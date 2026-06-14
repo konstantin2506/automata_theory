@@ -5,12 +5,21 @@ package main
 import (
 	"fmt"
 	"os"
+    intr "interpreter"
 )
+var __rootAST AstNode = nil
+func GetRoot() AstNode{
+    return __rootAST
+}
 %}
 
 %union {
 	num int
     str string
+    boolean bool
+    dType intr.VarT
+    node intr.AstNode
+    nodeList []intr.AstNode
 }
 
 
@@ -19,8 +28,8 @@ import (
 %token MULT
 %token DIV
 
-%token TRUE
-%token FALSE
+%token <boolean> TRUE
+%token <boolean> FALSE
 
 
 
@@ -36,8 +45,8 @@ import (
 %token DEFAULT_BRACE_LEFT
 %token DEFAULT_BRACE_RIGHT
 
-%token DIGIT_TYPE
-%token LOGIC_TYPE
+%token <dType> DIGIT_TYPE
+%token <dType> LOGIC_TYPE
 
 %token ASSIGNMENT_OPERATOR
 
@@ -83,12 +92,18 @@ import (
 %token <num> OCTAL;
 %token <num> DECIMAL;
 
+%type <node> statement
 
 %%
 
 top:
     statement_list
     {
+        root := intr.NewStatementListNode()
+        for _, statement := range $1.([]intr.AstNode){
+            root.PushStatement(statement)
+        }
+        __rootAST = root
         fmt.Println("\n[Парсер]: Успешное окончание разбора выражения!")
     }
 ;
@@ -96,75 +111,97 @@ top:
 
 statement_list:
     statement
-|   statement_list statement    
+    {
+        statements := NewStatementListNode()
+        statements.PushStatement($1.(intr.AstNode))
+        $$ = statements
+    }
+|   statement_list statement
+    {
+        statements := $1.(*StatementListNode)
+        statements.PushStatement($1.(intr.AstNode))
+        $$ = statements
+    }
 ;
 statement:
     variable_init_statement
 ;
 
 variable_init_statement:
-    left_part_assign arifmetic_expr STATEMENT_END
+    variable_type name_list ASSIGNMENT_OPERATOR arifmetic_expr STATEMENT_END
+    {
+        $$ = NewAssignNode()
+    }
 ;
 
-left_part_init:
-    variable_type name_list ASSIGNMENT_OPERATOR
-|   variable_type name_list dimension ASSIGNMENT_OPERATOR
 
-;
 
 variable_type:
-    DIGIT_TYPE
-|   LOGIC_TYPE    
+    DIGIT_TYPE 
+    {
+        $$ = $1
+    }
+|   LOGIC_TYPE 
+    {
+        $$ = $1
+    }
 
 name_list:
     NAME
+    {
+        $$ = NewNameNode($1)
+    }
 
-|   name_list COMMA NAME
+|   
 ;
 
 arifmetic_expr:
     term
+    {
+        $$ = $1
+    }
 ;
 term:
     term PLUS factor
     {
-        fmt.Println("term -> term + factor")
+        $$ = NewAddNode($1, $3)
     }
 |   term MINUS factor
     {
-        fmt.Println("term -> term - factor")
+        $$ = NewSubNode($1, $3)
     }
 
 |   factor
     {
-        fmt.Println("term -> factor")
+        $$ = $1
     }
 ;
 
 factor:
     factor MULT basic_part_ar
     {
-        fmt.Println("factor -> factor * basic_part_ar")
+        $$ = NewMulNode($1, $3)
+
     }
 |    factor DIV basic_part_ar
     {
-        fmt.Println("factor -> factor / basic_part_ar")
+        $$ = NewDivNode($1, $3)
     }
 
 |   basic_part_ar
     {
-        fmt.Println("factor -> basic_part_ar")
+        $$ = $1
     }
 ;
 
 basic_part_ar:
     DECIMAL
     {
-        fmt.Printf("basic_part_ar -> DECIMAL (%d)\n", $1)
+        $$ = NewIntegerNode($1)
     }
 |   DEFAULT_BRACE_LEFT term DEFAULT_BRACE_RIGHT
     {
-        fmt.Println("basic_part_ar -> ( term )")
+        $$ = $2
     }
 
 ;
