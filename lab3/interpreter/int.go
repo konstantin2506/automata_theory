@@ -24,3 +24,15 @@ func NewVariableInt(value int) Variable {
 func (v *Integer) Data() int {
 	return v.data
 }
+
+type IntegerNode struct {
+	x int
+}
+
+func NewIntegerNode(x int) AstNode {
+	return &IntegerNode{x}
+}
+
+func (node *IntegerNode) Eval(scope *Scope) (Variable, error) {
+	return NewVariableInt(node.x), nil
+}

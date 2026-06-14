@@ -24,3 +24,15 @@ func (v *Boolean) Data() bool {
 func NewVariableBool(value bool) Variable {
 	return &Boolean{value}
 }
+
+type BooleanNode struct {
+	x bool
+}
+
+func NewBooleanNode(x bool) AstNode {
+	return &BooleanNode{x}
+}
+
+func (node *BooleanNode) Eval(scope *Scope) (Variable, error) {
+	return NewVariableBool(node.x), nil
+}
