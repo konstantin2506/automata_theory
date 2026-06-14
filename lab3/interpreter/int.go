@@ -29,7 +29,7 @@ type IntegerNode struct {
 	x int
 }
 
-func NewIntegerNode(x int) AstNode {
+func NewIntegerNode(x int) *IntegerNode {
 	return &IntegerNode{x}
 }
 

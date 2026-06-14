@@ -29,7 +29,7 @@ type BooleanNode struct {
 	x bool
 }
 
-func NewBooleanNode(x bool) AstNode {
+func NewBooleanNode(x bool) *BooleanNode {
 	return &BooleanNode{x}
 }
 

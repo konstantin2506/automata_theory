@@ -18,7 +18,7 @@ type ForStatement struct {
 	doThis      AstNode
 }
 
-func NewForStatement(counter, stopper, stepper string, doThis AstNode) AstNode {
+func NewForStatement(counter, stopper, stepper string, doThis AstNode) *ForStatement {
 	return &ForStatement{counter, stopper, stepper, doThis}
 }
 

@@ -30,11 +30,11 @@ type BinBoolOpNode struct {
 	opType    BinBoolOpT
 }
 
-func NewAndNode(left, right AstNode) AstNode {
+func NewAndNode(left, right AstNode) *BinBoolOpNode {
 	return &BinBoolOpNode{left, right, func(l, r bool) bool { return l && r }, And}
 }
 
-func NewOrNode(left, right AstNode) AstNode {
+func NewOrNode(left, right AstNode) *BinBoolOpNode {
 	return &BinBoolOpNode{left, right, func(l, r bool) bool { return l || r }, Or}
 }
 

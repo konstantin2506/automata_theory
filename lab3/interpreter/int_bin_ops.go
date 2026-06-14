@@ -37,19 +37,19 @@ type BinIntOpNode struct {
 	opType    BinIntOpT
 }
 
-func NewDivNode(left, right AstNode) AstNode {
+func NewDivNode(left, right AstNode) *BinIntOpNode {
 	return &BinIntOpNode{left, right, func(l, r int) int { return l / r }, Div}
 }
 
-func NewMulNode(left, right AstNode) AstNode {
+func NewMulNode(left, right AstNode) *BinIntOpNode {
 	return &BinIntOpNode{left, right, func(l, r int) int { return l * r }, Mul}
 }
 
-func NewSubNode(left, right AstNode) AstNode {
+func NewSubNode(left, right AstNode) *BinIntOpNode {
 	return &BinIntOpNode{left, right, func(l, r int) int { return l - r }, Sub}
 }
 
-func NewAddNode(left, right AstNode) AstNode {
+func NewAddNode(left, right AstNode) *BinIntOpNode {
 	return &BinIntOpNode{left, right, func(l, r int) int { return l + r }, Add}
 }
 

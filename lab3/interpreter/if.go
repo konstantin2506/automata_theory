@@ -13,7 +13,7 @@ type IfStatementNode struct {
 	ifFalse   AstNode
 }
 
-func NewIfStatementNode(condition, ifTrue, ifFalse AstNode) AstNode {
+func NewIfStatementNode(condition, ifTrue, ifFalse AstNode) *IfStatementNode {
 	return &IfStatementNode{condition, ifTrue, ifFalse}
 }
 

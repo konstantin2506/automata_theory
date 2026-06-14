@@ -4,7 +4,7 @@ type StatementListNode struct {
 	statements []AstNode
 }
 
-func NewStatementListNode() AstNode {
+func NewStatementListNode() *StatementListNode {
 	return &StatementListNode{[]AstNode{}}
 }
 

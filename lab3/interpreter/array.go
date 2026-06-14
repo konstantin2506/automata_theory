@@ -79,7 +79,7 @@ func (v *VarArray) Type() VarT {
 	return Array
 }
 
-func NewArray(sizes []int, value Variable) (Variable, error) {
+func NewArray(sizes []int, value Variable) (*VarArray, error) {
 	if sizes[0] == 0 {
 		return nil, fmt.Errorf("%w: first size of array is 0", ErrArraySizes)
 	}
@@ -116,7 +116,7 @@ type ArrayElemNode struct {
 	array   AstNode
 }
 
-func NewArrayElemNode(indices []int, array AstNode) AstNode {
+func NewArrayElemNode(indices []int, array AstNode) *ArrayElemNode {
 	return &ArrayElemNode{indices, array}
 }
 
@@ -135,7 +135,7 @@ type ArrayDeclNode struct {
 	value  AstNode
 }
 
-func NewArrayDeclNode(innerType VarT, sizes []int, value AstNode) AstNode {
+func NewArrayDeclNode(innerType VarT, sizes []int, value AstNode) *ArrayDeclNode {
 	return &ArrayDeclNode{innerType, sizes, value}
 }
 

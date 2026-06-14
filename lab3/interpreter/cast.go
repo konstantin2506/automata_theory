@@ -12,11 +12,11 @@ type CastNode struct {
 	toType VarT
 }
 
-func NewToIntegerCastNode(child AstNode) AstNode {
+func NewToIntegerCastNode(child AstNode) *CastNode {
 	return &CastNode{child, Int}
 }
 
-func NewToBooleanCastNode(child AstNode) AstNode {
+func NewToBooleanCastNode(child AstNode) *CastNode {
 	return &CastNode{child, Bool}
 }
 

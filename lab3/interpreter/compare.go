@@ -41,43 +41,43 @@ type CompareNode struct {
 	mapped    bool
 }
 
-func NewEqReduceNode(left, right AstNode) AstNode {
+func NewEqReduceNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l == r }, eq, false}
 }
 
-func NewLtReduceNode(left, right AstNode) AstNode {
+func NewLtReduceNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l < r }, lt, false}
 }
 
-func NewLteReduceNode(left, right AstNode) AstNode {
+func NewLteReduceNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l <= r }, lte, false}
 }
 
-func NewGtReduceNode(left, right AstNode) AstNode {
+func NewGtReduceNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l > r }, gt, false}
 }
 
-func NewGteReduceNode(left, right AstNode) AstNode {
+func NewGteReduceNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l >= r }, gte, false}
 }
 
-func NewEqMapNode(left, right AstNode) AstNode {
+func NewEqMapNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l == r }, eq, true}
 }
 
-func NewLtMapNode(left, right AstNode) AstNode {
+func NewLtMapNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l < r }, lt, true}
 }
 
-func NewLteMapNode(left, right AstNode) AstNode {
+func NewLteMapNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l <= r }, lte, true}
 }
 
-func NewGtMapNode(left, right AstNode) AstNode {
+func NewGtMapNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l > r }, gt, true}
 }
 
-func NewGteMapNode(left, right AstNode) AstNode {
+func NewGteMapNode(left, right AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l >= r }, gte, true}
 }
 
@@ -106,7 +106,7 @@ func CompMap(v *VarArray, predicate func(int, int) bool) (Variable, error) {
 	for i := range v.data {
 		l := (v.data[i]).(*Integer)
 		resBool := predicate(l.Data(), 0)
-		res.(*VarArray).data[i] = NewVariableBool(resBool)
+		res.data[i] = NewVariableBool(resBool)
 	}
 
 	return res, nil

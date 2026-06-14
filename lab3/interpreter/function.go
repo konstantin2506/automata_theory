@@ -51,8 +51,8 @@ func checkTypesOfParams(got []Variable, want []Variable) error {
 	return nil
 }
 
-func NewFunctionCallNode(function *FunctionDeclNode, paramNodes []AstNode) FunctionCallNode {
-	return FunctionCallNode{nil, function, paramNodes}
+func NewFunctionCallNode(function *FunctionDeclNode, paramNodes []AstNode) *FunctionCallNode {
+	return &FunctionCallNode{nil, function, paramNodes}
 }
 
 func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {

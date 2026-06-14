@@ -4,7 +4,7 @@ type NameNode struct {
 	name string
 }
 
-func NewNameNode(name string) AstNode {
+func NewNameNode(name string) *NameNode {
 	return &NameNode{name}
 }
 

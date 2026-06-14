@@ -12,7 +12,7 @@ type AssignNode struct {
 	right AstNode
 }
 
-func NewAssignNode(left, right AstNode) AstNode {
+func NewAssignNode(left, right AstNode) *AssignNode {
 	return &AssignNode{left, right}
 }
 
