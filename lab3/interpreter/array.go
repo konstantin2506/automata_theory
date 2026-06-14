@@ -42,12 +42,9 @@ func (v *VarArray) CmpTypeWith(other *VarArray) error {
 	return nil
 }
 
-func (v *VarArray) Assign(indices []int, value Variable) error {
-	if !CmpTypeWithInner(v, value) {
-		return fmt.Errorf("%w: want: %d, got: %d", ErrArrayAssignTypesDiffer, v.dataT, value.Type())
-	}
+func (v *VarArray) At(indices []int) (Variable, int, error) {
 	if len(indices) != len(v.sizes) {
-		return fmt.Errorf("%w: sizes: %d, indices: %d", ErrArrayIndices, len(v.sizes), len(indices))
+		return nil, 0, fmt.Errorf("%w: sizes: %d, indices: %d", ErrArrayIndices, len(v.sizes), len(indices))
 	}
 	for i := range indices { // indexing from 1
 		indices[i] = indices[i] - 1
@@ -55,13 +52,24 @@ func (v *VarArray) Assign(indices []int, value Variable) error {
 
 	resultIndex := indices[len(indices)-1]
 	if resultIndex > v.sizes[len(v.sizes)-1] {
-		return fmt.Errorf("%w: idx[%d] = %d, dim[%d] = %d", ErrArrayOutOfRange, len(indices)-1, resultIndex, len(indices)-1, v.sizes[len(indices)-1])
+		return nil, 0, fmt.Errorf("%w: idx[%d] = %d, dim[%d] = %d", ErrArrayOutOfRange, len(indices)-1, resultIndex, len(indices)-1, v.sizes[len(indices)-1])
 	}
 	for i := len(indices) - 1; i >= 0; i-- {
 		if v.sizes[i] < indices[i] {
-			return fmt.Errorf("%w: idx[%d] = %d, dim[%d] = %d", ErrArrayOutOfRange, i, indices[i], i, v.sizes[i])
+			return nil, 0, fmt.Errorf("%w: idx[%d] = %d, dim[%d] = %d", ErrArrayOutOfRange, i, indices[i], i, v.sizes[i])
 		}
 		resultIndex = resultIndex*v.sizes[i] + indices[i]
+	}
+	return v.data[resultIndex], resultIndex, nil
+}
+
+func (v *VarArray) Assign(indices []int, value Variable) error {
+	if !CmpTypeWithInner(v, value) {
+		return fmt.Errorf("%w: want: %d, got: %d", ErrArrayAssignTypesDiffer, v.dataT, value.Type())
+	}
+	_, resultIndex, err := v.At(indices)
+	if err != nil {
+		return err
 	}
 	v.data[resultIndex] = value
 	return nil
@@ -101,4 +109,43 @@ func (v *VarArray) Copy() Variable {
 	}
 	copy(newSizes, v.sizes)
 	return &VarArray{newSizes, newData, v.dataT}
+}
+
+type ArrayElemNode struct {
+	indices []int
+	array   AstNode
+}
+
+func NewArrayElemNode(indices []int, array AstNode) AstNode {
+	return &ArrayElemNode{indices, array}
+}
+
+func (node *ArrayElemNode) Eval(scope *Scope) (Variable, error) {
+	arr, err := node.array.Eval(scope)
+	if err != nil {
+		return nil, err
+	}
+	res, _, err := arr.(*VarArray).At(node.indices)
+	return res, err
+}
+
+type ArrayDeclNode struct {
+	innerT VarT
+	sizes  []int
+	value  AstNode
+}
+
+func NewArrayDeclNode(innerType VarT, sizes []int, value AstNode) AstNode {
+	return &ArrayDeclNode{innerType, sizes, value}
+}
+
+func (node *ArrayDeclNode) Eval(scope *Scope) (Variable, error) {
+	v, err := node.value.Eval(scope)
+	if err != nil {
+		return nil, err
+	}
+	if v.Type() != node.innerT {
+		return nil, fmt.Errorf("%w: want: %s, got: %s", ErrArrayAssignTypesDiffer, TypeName(node.innerT), TypeName(v.Type()))
+	}
+	return NewArray(node.sizes, v)
 }
