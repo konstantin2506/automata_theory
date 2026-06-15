@@ -302,7 +302,6 @@ arguments:
         $$ = nodes
     }
 ;
-;
 expr:
     expr EQ
     {
@@ -344,10 +343,7 @@ expr:
     {
         $$ = intr.NewGteMapNode($1)
     }
-|   FUNCTION_CALL NAME DEFAULT_BRACE_LEFT arguments DEFAULT_BRACE_RIGHT
-    {
-        $$ = intr.NewFunctionCallNode($2, $4)
-    }
+
 |   term
     {
         $$ = $1
@@ -393,6 +389,7 @@ factor:
         $$ = intr.NewToIntegerCastNode($2)
     }
 
+
 |   basic_part_ar
     {
         $$ = $1
@@ -416,6 +413,10 @@ basic_part_ar:
 |   DEFAULT_BRACE_LEFT term DEFAULT_BRACE_RIGHT
     {
         $$ = $2
+    }
+|   FUNCTION_CALL NAME DEFAULT_BRACE_LEFT arguments DEFAULT_BRACE_RIGHT
+    {
+        $$ = intr.NewFunctionCallNode($2, $4)
     }
 |   NAME dimension
     {

@@ -1,10 +1,14 @@
+
+
+
 digit routing factorial(digit n){
-    digit m = 0;
-    m = perform factorial(m - 1);
-    return n * m;
+    check n - 1 eq then {
+        return 1;
+    }
+    
+    return n * perform factorial(n - 1);
 }
-digit m = 10;
-m = perform factorial(m);
-print(m);
-
-
+digit routing pathfinder(digit argc){
+    print(perform factorial(10));
+    return 0;
+}

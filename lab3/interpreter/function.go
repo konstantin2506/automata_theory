@@ -5,15 +5,12 @@ import (
 	"fmt"
 )
 
-const (
-	stackLimit = 1000
-)
-
 var (
 	ErrStackLimit                = errors.New("stack limit got")
 	ErrFunctionParamTypesDiffer  = errors.New("param types of function decl and function call differ")
 	ErrFunctionParamCountDiffer  = errors.New("param count of function decl and function call differ")
 	ErrFunctionResultTypesDiffer = errors.New("result types of function decl and function call differ")
+	ErrFunctionWithoutReturn     = errors.New("function without return statement")
 )
 
 type AstNode interface {
@@ -33,12 +30,21 @@ func NewFunctionDeclNode(name string, params []Variable, paramNames []string, re
 }
 
 func (node *FunctionDeclNode) Eval(scope *Scope) (Variable, error) {
+	if node.name == "pathfinder" {
+		res, err := node.child.Eval(scope)
+		if err != nil {
+			return NewVariableInt(2), err
+		}
+		if res == nil {
+			return NewVariableInt(1), fmt.Errorf("%w: 'pathfinder'", ErrFunctionWithoutReturn)
+		}
+		return NewVariableInt(0), nil
+	}
 	err := scope.DeclFunction(node.name, node)
 	return nil, err
 }
 
 type FunctionCallNode struct {
-	scope        *Scope
 	functionName string
 	function     *FunctionDeclNode
 	params       []AstNode
@@ -62,7 +68,7 @@ func checkTypesOfParams(got []Variable, want []Variable) error {
 }
 
 func NewFunctionCallNode(name string, paramNodes []AstNode) *FunctionCallNode {
-	return &FunctionCallNode{nil, name, nil, paramNodes}
+	return &FunctionCallNode{name, nil, paramNodes}
 }
 
 func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
@@ -73,6 +79,7 @@ func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
 	fn.function = decl
 	params := make([]Variable, len(fn.params))
 
+	funcScope := NewScope(nil, scope.globalScope)
 	for i, node := range fn.params {
 		param, err := node.Eval(scope)
 		if err != nil {
@@ -86,13 +93,13 @@ func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
 	}
 
 	for i, param := range params {
-		err := scope.ConstructCopy(fn.function.paramNames[i], param)
+		err := funcScope.ConstructCopy(fn.function.paramNames[i], param)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := fn.function.child.Eval(scope)
+	result, err := fn.function.child.Eval(&funcScope)
 	if err != nil {
 		return nil, err
 	}
@@ -114,10 +121,7 @@ func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
 	return result, nil
 }
 
-func (fn *FunctionCallNode) SetScope(scope *Scope) {
-	fn.scope = scope
-}
-
+/*
 type CallStack struct {
 	data       []*FunctionCallNode
 	scopeStack []*Scope
@@ -147,4 +151,4 @@ func (cs *CallStack) MakeCall(call *FunctionCallNode) (Variable, error) {
 
 func (cs *CallStack) TopScope() *Scope {
 	return cs.scopeStack[len(cs.scopeStack)-1]
-}
+}*/
