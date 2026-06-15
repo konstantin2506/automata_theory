@@ -34,6 +34,9 @@ func (node *IfStatementNode) Eval(scope *Scope) (Variable, error) {
 		}
 		return resTrue, nil
 	} else {
+		if node.ifFalse == nil {
+			return nil, nil
+		}
 		resFalse, err := node.ifFalse.Eval(&childScope)
 		if err != nil {
 			return nil, err

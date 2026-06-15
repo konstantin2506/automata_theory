@@ -42,7 +42,7 @@ func (l *lexerCtx) yyLex(yyLval *yySymType) int {
 %yyc l.current
 %yyn l.current = l.getc()
 
-D [0-9]+
+D -?[0-9]+
 
 %%
     // Перед распознаванием токена golex фиксирует начальную позицию
@@ -86,11 +86,17 @@ D [0-9]+
 
 "=" return ASSIGNMENT_OPERATOR
 
-"eq" return EQUALS
-"lt" return LOWER_THEN
-"lte" return LOWER_THEN_OR_EQUALS
-"gt" return GREATER_THEN
-"gte" return GREATER_THEN_OR_EQUALS
+"eq" return EQ
+"lt" return LT
+"lte" return LTE
+"gt" return GT
+"gte" return GTE
+
+"eq[]" return EQ_MAP
+"lt[]" return LT_MAP
+"lte[]" return LTE_MAP
+"gt[]" return GT_MAP
+"gte[]" return GTE_MAP
 
 "," return COMMA
 ";" return STATEMENT_END

@@ -51,11 +51,21 @@ func GetRoot() intr.AstNode{
 
 %token ASSIGNMENT_OPERATOR
 
-%token EQUALS
-%token LOWER_THEN
-%token LOWER_THEN_OR_EQUALS
-%token GREATER_THEN
-%token GREATER_THEN_OR_EQUALS
+%token EQ
+%token LT
+%token LTE
+%token GT
+%token GTE
+
+%token EQ_MAP
+%token LT_MAP
+%token LTE_MAP
+%token GT_MAP
+%token GTE_MAP
+
+
+
+
 
 %token COMMA
 %token STATEMENT_END
@@ -93,7 +103,7 @@ func GetRoot() intr.AstNode{
 %token <num> OCTAL;
 %token <num> DECIMAL;
 
-%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement
+%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement if_statement for_statement variable_assign_statement
 %type <dType> variable_type
 %%
 
@@ -125,10 +135,23 @@ statement:
     {
         $$ = $1 
     }
+|   variable_assign_statement
+    {
+        $$ = $1
+    }    
 |   print_statement    
     {
         $$ = $1
     }
+|   if_statement
+    {
+        $$ = $1
+    }
+|   for_statement
+    {
+        $$ = $1
+    }
+    
 ;
 print_statement:
     PRINT DEFAULT_BRACE_LEFT expr DEFAULT_BRACE_RIGHT STATEMENT_END
@@ -136,15 +159,36 @@ print_statement:
         $$ = intr.NewPrintNode($3)
     }
 ;
+variable_assign_statement:
+    NAME ASSIGNMENT_OPERATOR expr STATEMENT_END
+    {
+        $$ = intr.NewAssignNode($1, $3)
+    }
+;    
 variable_init_statement:
     variable_type NAME ASSIGNMENT_OPERATOR expr STATEMENT_END
     {
         $$ = intr.NewScalarDeclNode($2, $4, $1)
     }
 ;
+if_statement:
+    
+    CHECK expr THEN GROUP_BRACE_LEFT statement_list GROUP_BRACE_RIGHT OTHERWISE GROUP_BRACE_LEFT statement_list GROUP_BRACE_RIGHT
+    {
+        $$ = intr.NewIfStatementNode($2, $5, $9)
+    }
+|   CHECK expr THEN GROUP_BRACE_LEFT statement_list GROUP_BRACE_RIGHT
+    {
+        $$ = intr.NewIfStatementNode($2, $5, nil)
+    }   
+;
 
-
-
+for_statement:
+    FOR NAME STOP NAME STEP NAME GROUP_BRACE_LEFT statement_list GROUP_BRACE_RIGHT
+    {
+        $$ = intr.NewForStatementNode($2, $4, $6, $8)
+    }
+;
 variable_type:
     DIGIT_TYPE 
     {
@@ -157,13 +201,53 @@ variable_type:
 
 ;
 
-  
 
 expr:
-    term
+    expr EQ
+    {
+        $$ = intr.NewEqReduceNode($1)
+    }
+|   expr LT     
+    {
+        $$ = intr.NewLtReduceNode($1)
+    }
+|   expr LTE 
+    {
+        $$ = intr.NewLteReduceNode($1)
+    }
+|   expr GT 
+    {
+        $$ = intr.NewGtReduceNode($1)
+    }
+|   expr GTE 
+    {
+        $$ = intr.NewGteReduceNode($1)
+    }
+|   expr EQ_MAP 
+    {
+        $$ = intr.NewEqMapNode($1)
+    }
+|   expr LT_MAP 
+    {
+        $$ = intr.NewLtMapNode($1)
+    }
+|   expr LTE_MAP 
+    {
+        $$ = intr.NewLteMapNode($1)
+    }
+|   expr GT_MAP 
+    {
+        $$ = intr.NewGtMapNode($1)
+    }
+|   expr GTE_MAP 
+    {
+        $$ = intr.NewGteMapNode($1)
+    }
+|   term
     {
         $$ = $1
     }
+
 ;
 term:
     term PLUS factor
@@ -194,6 +278,14 @@ factor:
 |   factor AND basic_part_ar
     {
         $$ = intr.NewAndNode($1, $3)
+    }
+|   TO_LOGIC_CAST basic_part_ar
+    {
+        $$ = intr.NewToBooleanCastNode($2)
+    }
+|   TO_DIGIT_CAST basic_part_ar
+    {
+        $$ = intr.NewToIntegerCastNode($2)
     }
 
 |   basic_part_ar

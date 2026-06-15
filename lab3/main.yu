@@ -1,5 +1,14 @@
-logic abv_222 = false;
-logic b = true;
-logic e = true && b && true;
-digit a = 3;
-print(1 && false);
+digit i = 0;
+digit j = 10;
+digit k = 1;
+
+digit a = 67;
+
+
+for i stop j step k{
+    digit n = i;
+    for n stop j step k{
+        print(n);
+    }     
+}    
+

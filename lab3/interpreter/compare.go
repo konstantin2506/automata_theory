@@ -41,43 +41,43 @@ type CompareNode struct {
 	mapped    bool
 }
 
-func NewEqReduceNode(left, right AstNode) *CompareNode {
+func NewEqReduceNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l == r }, eq, false}
 }
 
-func NewLtReduceNode(left, right AstNode) *CompareNode {
+func NewLtReduceNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l < r }, lt, false}
 }
 
-func NewLteReduceNode(left, right AstNode) *CompareNode {
+func NewLteReduceNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l <= r }, lte, false}
 }
 
-func NewGtReduceNode(left, right AstNode) *CompareNode {
+func NewGtReduceNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l > r }, gt, false}
 }
 
-func NewGteReduceNode(left, right AstNode) *CompareNode {
+func NewGteReduceNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l >= r }, gte, false}
 }
 
-func NewEqMapNode(left, right AstNode) *CompareNode {
+func NewEqMapNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l == r }, eq, true}
 }
 
-func NewLtMapNode(left, right AstNode) *CompareNode {
+func NewLtMapNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l < r }, lt, true}
 }
 
-func NewLteMapNode(left, right AstNode) *CompareNode {
+func NewLteMapNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l <= r }, lte, true}
 }
 
-func NewGtMapNode(left, right AstNode) *CompareNode {
+func NewGtMapNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l > r }, gt, true}
 }
 
-func NewGteMapNode(left, right AstNode) *CompareNode {
+func NewGteMapNode(left AstNode) *CompareNode {
 	return &CompareNode{left, func(l, r int) bool { return l >= r }, gte, true}
 }
 

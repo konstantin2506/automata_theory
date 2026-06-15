@@ -31,7 +31,7 @@ func (scope *Scope) FindVariableDepth(varName string) (Variable, error) {
 	if scope.parent == nil {
 		return nil, fmt.Errorf("%w: '%s'", ErrVarNotDeclared, varName)
 	}
-	upperVar, err := scope.parent.parent.FindVariableDepth(varName)
+	upperVar, err := scope.parent.FindVariableDepth(varName)
 
 	return upperVar, err
 }

@@ -11,15 +11,15 @@ var (
 	ErrLoopStepperNotInt = errors.New("for loop stepper type is not int")
 )
 
-type ForStatement struct {
+type ForStatementNode struct {
 	counterName string
 	stopperName string
 	stepperName string
 	doThis      AstNode
 }
 
-func NewForStatement(counter, stopper, stepper string, doThis AstNode) *ForStatement {
-	return &ForStatement{counter, stopper, stepper, doThis}
+func NewForStatementNode(counter, stopper, stepper string, doThis AstNode) *ForStatementNode {
+	return &ForStatementNode{counter, stopper, stepper, doThis}
 }
 
 func findInt(scope *Scope, targetName string, errType error) (*Integer, error) {
@@ -33,7 +33,7 @@ func findInt(scope *Scope, targetName string, errType error) (*Integer, error) {
 	return target.(*Integer), nil
 }
 
-func (node *ForStatement) Eval(scope *Scope) (Variable, error) {
+func (node *ForStatementNode) Eval(scope *Scope) (Variable, error) {
 	counter, err := findInt(scope, node.counterName, ErrLoopCounterNotInt)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,12 @@ func (node *ForStatement) Eval(scope *Scope) (Variable, error) {
 	if err != nil {
 		return nil, err
 	}
-	for i := counter.Data(); i < stopper.Data(); i += stepper.Data() {
+	predicate := func(x, y int) bool { return x < y }
+	if stepper.Data() < 0 {
+		predicate = func(x, y int) bool { return x > y }
+	}
+	for i := counter.Data(); predicate(i, stopper.Data()); i += stepper.Data() {
+		counter.data = i
 		childScope := NewScope(scope)
 		res, err := node.doThis.Eval(&childScope)
 		if err != nil {
@@ -59,8 +64,9 @@ func (node *ForStatement) Eval(scope *Scope) (Variable, error) {
 			}
 			return res, nil
 		}
-	}
-	err = scope.AssignScalar(node.counterName, NewVariableInt(stopper.Data()*stepper.Data()))
 
-	return nil, err
+	}
+	// err = scope.AssignScalar(node.counterName, NewVariableInt(stopper.Data()*stepper.Data()))
+
+	return nil, nil
 }

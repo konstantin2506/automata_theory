@@ -8,16 +8,16 @@ import (
 var ErrOperandNotScalar = errors.New("left operand is not scalar")
 
 type AssignNode struct {
-	left  AstNode
+	name  string
 	right AstNode
 }
 
-func NewAssignNode(left, right AstNode) *AssignNode {
-	return &AssignNode{left, right}
+func NewAssignNode(name string, right AstNode) *AssignNode {
+	return &AssignNode{name, right}
 }
 
 func (node *AssignNode) Eval(scope *Scope) (Variable, error) {
-	l, err := node.left.Eval(scope)
+	l, err := scope.FindVariableDepth(node.name)
 	if err != nil {
 		return nil, err
 	}
