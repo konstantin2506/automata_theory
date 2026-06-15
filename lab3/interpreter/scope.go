@@ -6,21 +6,55 @@ import (
 	"fmt"
 )
 
+type GlobalScope struct {
+	scope     *Scope
+	functions map[string]*FunctionDeclNode
+}
+
+func NewGlobalScope() *GlobalScope {
+	scope := NewScope(nil, nil)
+	return &GlobalScope{&scope, make(map[string]*FunctionDeclNode)}
+}
+
 type Scope struct {
-	parent    *Scope
-	variables map[string]Variable
+	parent      *Scope
+	variables   map[string]Variable
+	globalScope *GlobalScope
 }
 
 var (
-	ErrVarDoubleDeclaration = errors.New("double declaration of variable")
-	ErrVarNotDeclared       = errors.New("variable not declared")
-	ErrVarInvalidType       = errors.New("invalid type of variable")
-	ErrNotAVectorType       = errors.New("not a vector type")
-	ErrNotAScalarType       = errors.New("not a scalar type")
+	ErrVarDoubleDeclaration     = errors.New("double declaration of variable")
+	ErrVarNotDeclared           = errors.New("variable not declared")
+	ErrVarInvalidType           = errors.New("invalid type of variable")
+	ErrNotAVectorType           = errors.New("not a vector type")
+	ErrNotAScalarType           = errors.New("not a scalar type")
+	ErrFuncDeclNotInGlobalScope = errors.New("function declaration not in gloabal scope")
+	ErrFuncDoubleDecl           = errors.New("double declaration of function")
+	ErrFuncNotDecl              = errors.New("function not declared")
 )
 
-func NewScope(parent *Scope) Scope {
-	return Scope{parent, make(map[string]Variable)}
+func NewScope(parent *Scope, globalScope *GlobalScope) Scope {
+	return Scope{parent, make(map[string]Variable), globalScope}
+}
+
+func (scope *Scope) DeclFunction(name string, node *FunctionDeclNode) error {
+	if scope != scope.globalScope.scope {
+		return fmt.Errorf("%w: name='%s'", ErrFuncDeclNotInGlobalScope, name)
+	}
+	_, exists := scope.globalScope.functions[name]
+	if exists {
+		return fmt.Errorf("%w: name='%s'", ErrFuncDoubleDecl, name)
+	}
+	scope.globalScope.functions[name] = node
+	return nil
+}
+
+func (scope *Scope) FindFunctionDecl(name string) (*FunctionDeclNode, error) {
+	fn, exists := scope.globalScope.functions[name]
+	if !exists {
+		return nil, fmt.Errorf("%w: name='%s'", ErrFuncNotDecl, name)
+	}
+	return fn, nil
 }
 
 func (scope *Scope) FindVariableDepth(varName string) (Variable, error) {

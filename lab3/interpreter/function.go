@@ -28,10 +28,20 @@ type FunctionDeclNode struct {
 	result     Variable
 }
 
+func NewFunctionDeclNode(name string, params []Variable, paramNames []string, result Variable, child AstNode) *FunctionDeclNode {
+	return &FunctionDeclNode{child, name, params, paramNames, result}
+}
+
+func (node *FunctionDeclNode) Eval(scope *Scope) (Variable, error) {
+	err := scope.DeclFunction(node.name, node)
+	return nil, err
+}
+
 type FunctionCallNode struct {
-	scope    *Scope
-	function *FunctionDeclNode
-	params   []AstNode
+	scope        *Scope
+	functionName string
+	function     *FunctionDeclNode
+	params       []AstNode
 }
 
 func checkTypesOfParams(got []Variable, want []Variable) error {
@@ -51,11 +61,16 @@ func checkTypesOfParams(got []Variable, want []Variable) error {
 	return nil
 }
 
-func NewFunctionCallNode(function *FunctionDeclNode, paramNodes []AstNode) *FunctionCallNode {
-	return &FunctionCallNode{nil, function, paramNodes}
+func NewFunctionCallNode(name string, paramNodes []AstNode) *FunctionCallNode {
+	return &FunctionCallNode{nil, name, nil, paramNodes}
 }
 
 func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
+	decl, err := scope.FindFunctionDecl(fn.functionName)
+	if err != nil {
+		return nil, err
+	}
+	fn.function = decl
 	params := make([]Variable, len(fn.params))
 
 	for i, node := range fn.params {
@@ -65,7 +80,7 @@ func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
 		}
 		params[i] = param
 	}
-	err := checkTypesOfParams(params, fn.function.params)
+	err = checkTypesOfParams(params, fn.function.params)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +92,7 @@ func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
 		}
 	}
 
-	result, err := fn.function.child.Eval(fn.scope)
+	result, err := fn.function.child.Eval(scope)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +129,7 @@ func NewCallStack() CallStack {
 }
 
 func (cs *CallStack) MakeCall(call *FunctionCallNode) (Variable, error) {
-	newScope := NewScope(nil)
+	newScope := NewScope(nil, cs.TopScope().globalScope)
 	call.SetScope(&newScope)
 	cs.data = append(cs.data, call)
 	cs.scopeStack = append(cs.scopeStack, &newScope)

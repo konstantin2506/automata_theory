@@ -5,7 +5,10 @@ import (
 	"fmt"
 )
 
-var ErrScalarDeclTypesDiffer = errors.New("scalar decl types differ")
+var (
+	ErrScalarDeclTypesDiffer = errors.New("scalar decl types differ")
+	ErrSizeNotInt            = errors.New("size of dimension is not integer")
+)
 
 type ScalarDeclNode struct {
 	name   string
@@ -36,11 +39,11 @@ func (node *ScalarDeclNode) Eval(scope *Scope) (Variable, error) {
 type ArrayDeclNode struct {
 	innerT VarT
 	name   string
-	sizes  []int
+	sizes  []AstNode
 	value  AstNode
 }
 
-func NewArrayDeclNode(innerType VarT, name string, sizes []int, value AstNode) *ArrayDeclNode {
+func NewArrayDeclNode(innerType VarT, name string, sizes []AstNode, value AstNode) *ArrayDeclNode {
 	return &ArrayDeclNode{innerType, name, sizes, value}
 }
 
@@ -52,7 +55,18 @@ func (node *ArrayDeclNode) Eval(scope *Scope) (Variable, error) {
 	if v.Type() != node.innerT {
 		return nil, fmt.Errorf("%w: want=%s, got=%s", ErrArrayAssignTypesDiffer, TypeName(node.innerT), TypeName(v.Type()))
 	}
-	err = scope.ConstructArray(node.name, node.sizes, v)
+	sizes := make([]int, len(node.sizes))
+	for i, sizeNode := range node.sizes {
+		s, err := sizeNode.Eval(scope)
+		if err != nil {
+			return nil, err
+		}
+		if s.Type() != Int {
+			return nil, ErrSizeNotInt
+		}
+		sizes[i] = s.(*Integer).Data()
+	}
+	err = scope.ConstructArray(node.name, sizes, v)
 	if err != nil {
 		return nil, err
 	}

@@ -1,14 +1,10 @@
-digit i = 0;
-digit j = 10;
-digit k = 1;
+digit routing factorial(digit n){
+    digit m = 0;
+    m = perform factorial(m - 1);
+    return n * m;
+}
+digit m = 10;
+m = perform factorial(m);
+print(m);
 
-digit a = 67;
-
-
-for i stop j step k{
-    digit n = i;
-    for n stop j step k{
-        print(n);
-    }     
-}    
 

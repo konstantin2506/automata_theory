@@ -11,6 +11,10 @@ var __rootAST intr.AstNode = nil
 func GetRoot() intr.AstNode{
     return __rootAST
 }
+type paramStruct struct{
+    names []string
+    types []intr.Variable
+}
 %}
 
 %union {
@@ -20,6 +24,8 @@ func GetRoot() intr.AstNode{
     dType intr.VarT
     node intr.AstNode
     nodeList []intr.AstNode
+    params paramStruct
+    variable intr.Variable
 }
 
 %token PRINT
@@ -103,8 +109,10 @@ func GetRoot() intr.AstNode{
 %token <num> OCTAL;
 %token <num> DECIMAL;
 
-%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement if_statement for_statement variable_assign_statement
+%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement if_statement for_statement variable_assign_statement function_decl_statement return_statement
 %type <dType> variable_type
+%type <nodeList> dimension arguments
+%type <params> params_names 
 %%
 
 top:
@@ -151,6 +159,14 @@ statement:
     {
         $$ = $1
     }
+|   function_decl_statement
+    {
+        $$ = $1
+    }
+|   return_statement
+    {
+        $$ = $1
+    }
     
 ;
 print_statement:
@@ -164,11 +180,20 @@ variable_assign_statement:
     {
         $$ = intr.NewAssignNode($1, $3)
     }
+|   NAME dimension ASSIGNMENT_OPERATOR expr STATEMENT_END
+    {
+        elem := intr.NewArrayElemNode($2, $1)
+        $$ = intr.NewArrayAssignNode(elem, $4)
+    }
 ;    
 variable_init_statement:
     variable_type NAME ASSIGNMENT_OPERATOR expr STATEMENT_END
     {
         $$ = intr.NewScalarDeclNode($2, $4, $1)
+    }
+|   variable_type NAME dimension ASSIGNMENT_OPERATOR expr STATEMENT_END
+    {
+        $$ = intr.NewArrayDeclNode($1, $2, $3, $5)
     }
 ;
 if_statement:
@@ -189,6 +214,13 @@ for_statement:
         $$ = intr.NewForStatementNode($2, $4, $6, $8)
     }
 ;
+return_statement:
+    RETURN expr STATEMENT_END
+    {
+        $$ = $2
+    }
+;
+
 variable_type:
     DIGIT_TYPE 
     {
@@ -200,8 +232,77 @@ variable_type:
     }
 
 ;
+function_decl_statement:
+    variable_type FUNCTION_DECL NAME DEFAULT_BRACE_LEFT params_names DEFAULT_BRACE_RIGHT GROUP_BRACE_LEFT statement_list GROUP_BRACE_RIGHT
+    {
+        var res intr.Variable = nil
+        if $1 == intr.Int{
+            res = intr.NewVariableInt(0)
+        }
+        if $1 == intr.Bool{
+            res = intr.NewVariableBool(false)
+        }
+        $$ = intr.NewFunctionDeclNode($3, $5.types, $5.names, res, $8)
+    }
+    
+;
+params_names:
+    params_names COMMA variable_type NAME
+    {
+        names := $1.names
+        types := $1.types
+        names = append(names, $4)
+        if $3 == intr.Int{
+            types = append(types, intr.NewVariableInt(0))
+        }
+        if $3 == intr.Bool{
+            types = append(types, intr.NewVariableBool(false))
+        }
 
+        $$ = paramStruct{names, types}
+    }
+|   variable_type NAME
+    {
+        names := []string{}
+        types := []intr.Variable{}
+        names = append(names, $2)
+        if $1 == intr.Int{
+            types = append(types, intr.NewVariableInt(0))
+        }
+        if $1 == intr.Bool{
+            types = append(types, intr.NewVariableBool(false))
+        }
 
+        $$ = paramStruct{names, types}
+    }
+;
+dimension:
+    dimension SQUARE_BRACE_LEFT expr SQUARE_BRACE_RIGHT
+    {
+        nodes := append($1, $3)
+        $$ = nodes
+    }
+|   SQUARE_BRACE_LEFT expr SQUARE_BRACE_RIGHT
+    {
+        nodes := []intr.AstNode{}
+        nodes = append(nodes, $2)
+        $$ = nodes
+    }
+;
+arguments:
+    arguments COMMA expr
+    {
+        nodes := append($1, $3)
+        $$ = nodes
+    }
+|   expr
+    {
+        nodes := []intr.AstNode{}
+        nodes = append(nodes, $1)
+        $$ = nodes
+    }
+;
+;
 expr:
     expr EQ
     {
@@ -242,6 +343,10 @@ expr:
 |   expr GTE_MAP 
     {
         $$ = intr.NewGteMapNode($1)
+    }
+|   FUNCTION_CALL NAME DEFAULT_BRACE_LEFT arguments DEFAULT_BRACE_RIGHT
+    {
+        $$ = intr.NewFunctionCallNode($2, $4)
     }
 |   term
     {
@@ -311,6 +416,10 @@ basic_part_ar:
 |   DEFAULT_BRACE_LEFT term DEFAULT_BRACE_RIGHT
     {
         $$ = $2
+    }
+|   NAME dimension
+    {
+        $$ = intr.NewArrayElemNode($2, $1)
     }
 |   NAME 
     {

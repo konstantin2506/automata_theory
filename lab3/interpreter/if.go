@@ -26,7 +26,7 @@ func (node *IfStatementNode) Eval(scope *Scope) (Variable, error) {
 		return nil, fmt.Errorf("%w: type=%s", ErrConditionNotBool, TypeName(res.Type()))
 	}
 	condition := res.(*Boolean).Data()
-	childScope := NewScope(scope)
+	childScope := NewScope(scope, scope.globalScope)
 	if condition {
 		resTrue, err := node.ifTrue.Eval(&childScope)
 		if err != nil {

@@ -3,15 +3,15 @@
 //line parser.y:3
 package main
 
-import __yyfmt__ "fmt"
-
-//line parser.y:3
-
 import (
 	"fmt"
-	intr "lab3/interpreter"
+	__yyfmt__ "fmt"
 	"os"
+
+	intr "lab3/interpreter"
 )
+
+//line parser.y:3
 
 var __rootAST intr.AstNode = nil
 
@@ -19,7 +19,12 @@ func GetRoot() intr.AstNode {
 	return __rootAST
 }
 
-//line parser.y:16
+type paramStruct struct {
+	names []string
+	types []intr.Variable
+}
+
+//line parser.y:20
 type yySymType struct {
 	yys      int
 	num      int
@@ -28,61 +33,65 @@ type yySymType struct {
 	dType    intr.VarT
 	node     intr.AstNode
 	nodeList []intr.AstNode
+	params   paramStruct
+	variable intr.Variable
 }
 
-const PRINT = 57346
-const PLUS = 57347
-const MINUS = 57348
-const MULT = 57349
-const DIV = 57350
-const TRUE = 57351
-const FALSE = 57352
-const TO_LOGIC_CAST = 57353
-const TO_DIGIT_CAST = 57354
-const SIZE_OPERATOR = 57355
-const RESIZE_OPERATOR = 57356
-const SQUARE_BRACE_LEFT = 57357
-const SQUARE_BRACE_RIGHT = 57358
-const GROUP_BRACE_LEFT = 57359
-const GROUP_BRACE_RIGHT = 57360
-const DEFAULT_BRACE_LEFT = 57361
-const DEFAULT_BRACE_RIGHT = 57362
-const DIGIT_TYPE = 57363
-const LOGIC_TYPE = 57364
-const ASSIGNMENT_OPERATOR = 57365
-const EQ = 57366
-const LT = 57367
-const LTE = 57368
-const GT = 57369
-const GTE = 57370
-const EQ_MAP = 57371
-const LT_MAP = 57372
-const LTE_MAP = 57373
-const GT_MAP = 57374
-const GTE_MAP = 57375
-const COMMA = 57376
-const STATEMENT_END = 57377
-const NOT = 57378
-const AND = 57379
-const MOST = 57380
-const FOR = 57381
-const STOP = 57382
-const STEP = 57383
-const CHECK = 57384
-const THEN = 57385
-const OTHERWISE = 57386
-const MOVE_OPERATOR = 57387
-const ROTATE_OPERATOR = 57388
-const SURROUNDINGS = 57389
-const FUNCTION_DECL = 57390
-const FUNCTION_CALL = 57391
-const RETURN = 57392
-const PLEASE = 57393
-const THANK_YOU = 57394
-const NAME = 57395
-const HEX = 57396
-const OCTAL = 57397
-const DECIMAL = 57398
+const (
+	PRINT               = 57346
+	PLUS                = 57347
+	MINUS               = 57348
+	MULT                = 57349
+	DIV                 = 57350
+	TRUE                = 57351
+	FALSE               = 57352
+	TO_LOGIC_CAST       = 57353
+	TO_DIGIT_CAST       = 57354
+	SIZE_OPERATOR       = 57355
+	RESIZE_OPERATOR     = 57356
+	SQUARE_BRACE_LEFT   = 57357
+	SQUARE_BRACE_RIGHT  = 57358
+	GROUP_BRACE_LEFT    = 57359
+	GROUP_BRACE_RIGHT   = 57360
+	DEFAULT_BRACE_LEFT  = 57361
+	DEFAULT_BRACE_RIGHT = 57362
+	DIGIT_TYPE          = 57363
+	LOGIC_TYPE          = 57364
+	ASSIGNMENT_OPERATOR = 57365
+	EQ                  = 57366
+	LT                  = 57367
+	LTE                 = 57368
+	GT                  = 57369
+	GTE                 = 57370
+	EQ_MAP              = 57371
+	LT_MAP              = 57372
+	LTE_MAP             = 57373
+	GT_MAP              = 57374
+	GTE_MAP             = 57375
+	COMMA               = 57376
+	STATEMENT_END       = 57377
+	NOT                 = 57378
+	AND                 = 57379
+	MOST                = 57380
+	FOR                 = 57381
+	STOP                = 57382
+	STEP                = 57383
+	CHECK               = 57384
+	THEN                = 57385
+	OTHERWISE           = 57386
+	MOVE_OPERATOR       = 57387
+	ROTATE_OPERATOR     = 57388
+	SURROUNDINGS        = 57389
+	FUNCTION_DECL       = 57390
+	FUNCTION_CALL       = 57391
+	RETURN              = 57392
+	PLEASE              = 57393
+	THANK_YOU           = 57394
+	NAME                = 57395
+	HEX                 = 57396
+	OCTAL               = 57397
+	DECIMAL             = 57398
+)
 
 var yyToknames = [...]string{
 	"$end",
@@ -145,11 +154,13 @@ var yyToknames = [...]string{
 
 var yyStatenames = [...]string{}
 
-const yyEofCode = 1
-const yyErrCode = 2
-const yyInitialStackSize = 16
+const (
+	yyEofCode          = 1
+	yyErrCode          = 2
+	yyInitialStackSize = 16
+)
 
-//line parser.y:324
+//line parser.y:433
 
 // Функция вывода ошибок, требуемая для yyLexer
 func (l *lexerCtx) Error(s string) {
@@ -165,80 +176,105 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 167
+const yyLast = 278
 
 var yyAct = [...]int8{
-	3, 26, 27, 16, 2, 26, 27, 23, 24, 11,
-	71, 29, 65, 31, 17, 29, 11, 72, 11, 69,
-	54, 67, 11, 78, 32, 22, 14, 15, 19, 21,
-	77, 18, 70, 14, 15, 14, 15, 25, 74, 14,
-	15, 73, 58, 1, 13, 30, 9, 12, 28, 30,
-	5, 13, 28, 13, 12, 8, 12, 13, 10, 53,
-	12, 51, 52, 68, 7, 10, 6, 10, 4, 16,
-	0, 10, 59, 60, 48, 49, 16, 16, 75, 76,
-	46, 47, 0, 0, 46, 47, 61, 62, 63, 36,
-	37, 38, 39, 40, 41, 42, 43, 44, 45, 64,
-	0, 0, 0, 0, 50, 0, 0, 0, 35, 36,
-	37, 38, 39, 40, 41, 42, 43, 44, 45, 0,
-	66, 36, 37, 38, 39, 40, 41, 42, 43, 44,
-	45, 57, 56, 20, 0, 36, 37, 38, 39, 40,
-	41, 42, 43, 44, 45, 0, 0, 0, 0, 0,
-	0, 0, 33, 34, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 55,
+	3, 11, 2, 19, 26, 32, 13, 33, 34, 30,
+	31, 29, 33, 34, 30, 31, 113, 36, 106, 102,
+	119, 39, 36, 17, 18, 13, 21, 43, 87, 46,
+	47, 20, 59, 42, 38, 109, 65, 66, 98, 118,
+	69, 15, 17, 18, 14, 71, 94, 27, 13, 75,
+	76, 37, 16, 45, 35, 12, 37, 62, 63, 35,
+	15, 72, 116, 14, 80, 17, 18, 23, 83, 84,
+	85, 16, 81, 82, 12, 91, 73, 89, 28, 33,
+	34, 105, 95, 15, 13, 97, 14, 64, 41, 36,
+	13, 45, 100, 25, 16, 104, 19, 12, 103, 44,
+	114, 17, 18, 108, 24, 68, 101, 17, 18, 110,
+	112, 111, 40, 19, 115, 67, 19, 117, 19, 15,
+	107, 24, 14, 37, 79, 15, 35, 45, 14, 22,
+	16, 17, 18, 12, 24, 1, 16, 60, 61, 12,
+	49, 50, 51, 52, 53, 54, 55, 56, 57, 58,
+	60, 61, 86, 90, 96, 10, 9, 5, 8, 48,
+	49, 50, 51, 52, 53, 54, 55, 56, 57, 58,
+	7, 99, 49, 50, 51, 52, 53, 54, 55, 56,
+	57, 58, 6, 92, 49, 50, 51, 52, 53, 54,
+	55, 56, 57, 58, 4, 88, 49, 50, 51, 52,
+	53, 54, 55, 56, 57, 58, 0, 74, 49, 50,
+	51, 52, 53, 54, 55, 56, 57, 58, 93, 70,
+	0, 0, 0, 0, 0, 0, 49, 50, 51, 52,
+	53, 54, 55, 56, 57, 58, 78, 0, 0, 0,
+	49, 50, 51, 52, 53, 54, 55, 56, 57, 58,
+	77, 0, 0, 0, 0, 0, 0, 0, 49, 50,
+	51, 52, 53, 54, 55, 56, 57, 58, 49, 50,
+	51, 52, 53, 54, 55, 56, 57, 58,
 }
 
 var yyPact = [...]int16{
-	18, -1000, 18, -1000, -1000, -1000, -1000, -1000, -1000, -39,
-	8, 9, -4, -40, -1000, -1000, -1000, 1, -4, -4,
-	65, 75, 67, -8, -8, -1000, -1000, -1000, -1000, -4,
-	-1000, -20, -4, 97, 111, 25, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -1000, -1000, -1000, -4, -4, -8, -8,
-	-8, -1000, -1000, 79, -41, 85, -1000, -14, 18, 67,
-	67, -1000, -1000, -1000, -1000, -22, -1000, -1000, 14, -43,
-	-27, 24, 21, 18, 18, 12, 5, -1000, -1000,
+	86, -1000, 86, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	-1000, -22, 106, 74, -2, -19, -2, -1000, -1000, -1000,
+	89, -20, -2, 76, -2, -2, 116, -21, 145, 50,
+	70, 70, -1000, -1000, -1000, -1000, 3, 119, 0, 184,
+	-2, 38, 57, 172, -2, -2, 234, 216, 107, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, 45,
+	3, 3, 70, 70, 70, -1000, -1000, 132, 112, -25,
+	-1000, 160, -2, 110, -1000, 148, 202, -1000, 11, 86,
+	-2, 50, 50, -1000, -1000, -1000, -1000, -3, -1000, 136,
+	72, -34, -1000, -1000, -1000, 80, 61, 244, -35, -1000,
+	103, 110, -1000, -9, -2, -1000, 94, 86, -37, 83,
+	244, 86, 44, -1000, 86, 21, -1000, 2, -1000, -1000,
 }
 
 var yyPgo = [...]uint8{
-	0, 0, 4, 68, 133, 29, 25, 37, 66, 64,
-	55, 50, 46, 43,
+	0, 0, 2, 194, 4, 78, 11, 5, 182, 170,
+	158, 157, 156, 155, 1, 67, 154, 153, 135,
 }
 
 var yyR1 = [...]int8{
-	0, 13, 2, 2, 1, 1, 1, 1, 1, 8,
-	11, 3, 9, 9, 10, 12, 12, 4, 4, 4,
-	4, 4, 4, 4, 4, 4, 4, 4, 5, 5,
-	5, 6, 6, 6, 6, 6, 6, 7, 7, 7,
-	7, 7,
+	0, 18, 2, 2, 1, 1, 1, 1, 1, 1,
+	1, 8, 11, 11, 3, 3, 9, 9, 10, 13,
+	14, 14, 12, 17, 17, 15, 15, 16, 16, 4,
+	4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+	4, 5, 5, 5, 6, 6, 6, 6, 6, 6,
+	7, 7, 7, 7, 7, 7,
 }
 
 var yyR2 = [...]int8{
-	0, 1, 1, 2, 1, 1, 1, 1, 1, 5,
-	4, 5, 10, 6, 9, 1, 1, 2, 2, 2,
-	2, 2, 2, 2, 2, 2, 2, 1, 3, 3,
-	1, 3, 3, 3, 2, 2, 1, 1, 1, 1,
-	3, 1,
+	0, 1, 1, 2, 1, 1, 1, 1, 1, 1,
+	1, 5, 4, 5, 5, 6, 10, 6, 9, 3,
+	1, 1, 9, 4, 2, 4, 3, 3, 1, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 5,
+	1, 3, 3, 1, 3, 3, 3, 2, 2, 1,
+	1, 1, 1, 3, 2, 1,
 }
 
 var yyChk = [...]int16{
-	-1000, -13, -2, -1, -3, -11, -8, -9, -10, -12,
-	53, 4, 42, 39, 21, 22, -1, 53, 23, 19,
-	-4, -5, -6, 11, 12, -7, 9, 10, 56, 19,
-	53, 53, 23, -4, -4, 43, 24, 25, 26, 27,
-	28, 29, 30, 31, 32, 33, 5, 6, 7, 8,
-	37, -7, -7, -5, 40, -4, 35, 20, 17, -6,
-	-6, -7, -7, -7, 20, 53, 35, 35, -2, 41,
-	18, 53, 44, 17, 17, -2, -2, 18, 18,
+	-1000, -18, -2, -1, -3, -11, -8, -9, -10, -12,
+	-13, -14, 53, 4, 42, 39, 50, 21, 22, -1,
+	53, 48, 23, -15, 15, 19, -4, 49, -5, -6,
+	11, 12, -7, 9, 10, 56, 19, 53, 53, -4,
+	23, -15, 53, -4, 23, 15, -4, -4, 43, 24,
+	25, 26, 27, 28, 29, 30, 31, 32, 33, 53,
+	5, 6, 7, 8, 37, -7, -7, -5, -15, 40,
+	35, -4, 23, 19, 35, -4, -4, 16, 20, 17,
+	19, -6, -6, -7, -7, -7, 20, 53, 35, -4,
+	-17, -14, 35, 16, 35, -2, -16, -4, 41, 35,
+	20, 34, 53, 18, 34, 20, 53, 17, -14, 44,
+	-4, 17, -2, 53, 17, -2, 18, -2, 18, 18,
 }
 
 var yyDef = [...]int8{
-	0, -2, 1, 2, 4, 5, 6, 7, 8, 0,
-	0, 0, 0, 0, 15, 16, 3, 0, 0, 0,
-	0, 27, 30, 0, 0, 36, 37, 38, 39, 0,
-	41, 0, 0, 0, 0, 0, 17, 18, 19, 20,
-	21, 22, 23, 24, 25, 26, 0, 0, 0, 0,
-	0, 34, 35, 0, 0, 0, 10, 0, 0, 28,
-	29, 31, 32, 33, 40, 0, 11, 9, 0, 0,
-	13, 0, 0, 0, 0, 0, 0, 14, 12,
+	0, -2, 1, 2, 4, 5, 6, 7, 8, 9,
+	10, 0, 0, 0, 0, 0, 0, 20, 21, 3,
+	0, 0, 0, 0, 0, 0, 0, 0, 40, 43,
+	0, 0, 49, 50, 51, 52, 0, 55, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 29,
+	30, 31, 32, 33, 34, 35, 36, 37, 38, 0,
+	0, 0, 0, 0, 0, 47, 48, 0, 54, 0,
+	19, 0, 0, 0, 12, 0, 0, 26, 0, 0,
+	0, 41, 42, 44, 45, 46, 53, 0, 14, 0,
+	0, 0, 13, 25, 11, 0, 0, 28, 0, 15,
+	0, 0, 24, 17, 0, 39, 0, 0, 0, 0,
+	27, 0, 0, 23, 0, 0, 22, 0, 18, 16,
 }
 
 var yyTok1 = [...]int8{
@@ -270,7 +306,7 @@ var yyErrorMessages = [...]struct {
 
 var (
 	yyDebug        = 0
-	yyErrorVerbose = false
+	yyErrorVerbose = true
 )
 
 type yyLexer interface {
@@ -597,14 +633,14 @@ yydefault:
 
 	case 1:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:112
+//line parser.y:120
 		{
 			__rootAST = yyDollar[1].node
 			fmt.Println("\n[Parser]: AstPart=ok")
 		}
 	case 2:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:121
+//line parser.y:129
 		{
 			statements := intr.NewStatementListNode()
 			statements.PushStatement(yyDollar[1].node)
@@ -612,7 +648,7 @@ yydefault:
 		}
 	case 3:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:127
+//line parser.y:135
 		{
 			statements := yyDollar[1].node.(*intr.StatementListNode)
 			statements.PushStatement(yyDollar[2].node)
@@ -620,231 +656,347 @@ yydefault:
 		}
 	case 4:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:135
+//line parser.y:143
 		{
 			yyVAL.node = yyDollar[1].node
 		}
 	case 5:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:139
+//line parser.y:147
 		{
 			yyVAL.node = yyDollar[1].node
 		}
 	case 6:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:143
+//line parser.y:151
 		{
 			yyVAL.node = yyDollar[1].node
 		}
 	case 7:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:147
+//line parser.y:155
 		{
 			yyVAL.node = yyDollar[1].node
 		}
 	case 8:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:151
+//line parser.y:159
 		{
 			yyVAL.node = yyDollar[1].node
 		}
 	case 9:
-		yyDollar = yyS[yypt-5 : yypt+1]
-//line parser.y:158
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:163
 		{
-			yyVAL.node = intr.NewPrintNode(yyDollar[3].node)
+			yyVAL.node = yyDollar[1].node
 		}
 	case 10:
-		yyDollar = yyS[yypt-4 : yypt+1]
-//line parser.y:164
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:167
 		{
-			yyVAL.node = intr.NewAssignNode(yyDollar[1].str, yyDollar[3].node)
+			yyVAL.node = yyDollar[1].node
 		}
 	case 11:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line parser.y:170
+//line parser.y:174
+		{
+			yyVAL.node = intr.NewPrintNode(yyDollar[3].node)
+		}
+	case 12:
+		yyDollar = yyS[yypt-4 : yypt+1]
+//line parser.y:180
+		{
+			yyVAL.node = intr.NewAssignNode(yyDollar[1].str, yyDollar[3].node)
+		}
+	case 13:
+		yyDollar = yyS[yypt-5 : yypt+1]
+//line parser.y:184
+		{
+			elem := intr.NewArrayElemNode(yyDollar[2].nodeList, yyDollar[1].str)
+			yyVAL.node = intr.NewArrayAssignNode(elem, yyDollar[4].node)
+		}
+	case 14:
+		yyDollar = yyS[yypt-5 : yypt+1]
+//line parser.y:191
 		{
 			yyVAL.node = intr.NewScalarDeclNode(yyDollar[2].str, yyDollar[4].node, yyDollar[1].dType)
 		}
-	case 12:
+	case 15:
+		yyDollar = yyS[yypt-6 : yypt+1]
+//line parser.y:195
+		{
+			yyVAL.node = intr.NewArrayDeclNode(yyDollar[1].dType, yyDollar[2].str, yyDollar[3].nodeList, yyDollar[5].node)
+		}
+	case 16:
 		yyDollar = yyS[yypt-10 : yypt+1]
-//line parser.y:177
+//line parser.y:202
 		{
 			yyVAL.node = intr.NewIfStatementNode(yyDollar[2].node, yyDollar[5].node, yyDollar[9].node)
 		}
-	case 13:
+	case 17:
 		yyDollar = yyS[yypt-6 : yypt+1]
-//line parser.y:181
+//line parser.y:206
 		{
 			yyVAL.node = intr.NewIfStatementNode(yyDollar[2].node, yyDollar[5].node, nil)
 		}
-	case 14:
+	case 18:
 		yyDollar = yyS[yypt-9 : yypt+1]
-//line parser.y:188
+//line parser.y:213
 		{
 			yyVAL.node = intr.NewForStatementNode(yyDollar[2].str, yyDollar[4].str, yyDollar[6].str, yyDollar[8].node)
 		}
-	case 15:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:194
-		{
-			yyVAL.dType = yyDollar[1].dType
-		}
-	case 16:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:198
-		{
-			yyVAL.dType = yyDollar[1].dType
-		}
-	case 17:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:207
-		{
-			yyVAL.node = intr.NewEqReduceNode(yyDollar[1].node)
-		}
-	case 18:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:211
-		{
-			yyVAL.node = intr.NewLtReduceNode(yyDollar[1].node)
-		}
 	case 19:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:215
-		{
-			yyVAL.node = intr.NewLteReduceNode(yyDollar[1].node)
-		}
-	case 20:
-		yyDollar = yyS[yypt-2 : yypt+1]
+		yyDollar = yyS[yypt-3 : yypt+1]
 //line parser.y:219
-		{
-			yyVAL.node = intr.NewGtReduceNode(yyDollar[1].node)
-		}
-	case 21:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:223
-		{
-			yyVAL.node = intr.NewGteReduceNode(yyDollar[1].node)
-		}
-	case 22:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:227
-		{
-			yyVAL.node = intr.NewEqMapNode(yyDollar[1].node)
-		}
-	case 23:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:231
-		{
-			yyVAL.node = intr.NewLtMapNode(yyDollar[1].node)
-		}
-	case 24:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:235
-		{
-			yyVAL.node = intr.NewLteMapNode(yyDollar[1].node)
-		}
-	case 25:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:239
-		{
-			yyVAL.node = intr.NewGtMapNode(yyDollar[1].node)
-		}
-	case 26:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:243
-		{
-			yyVAL.node = intr.NewGteMapNode(yyDollar[1].node)
-		}
-	case 27:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:247
-		{
-			yyVAL.node = yyDollar[1].node
-		}
-	case 28:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line parser.y:254
-		{
-			yyVAL.node = intr.NewAddNode(yyDollar[1].node, yyDollar[3].node)
-		}
-	case 29:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line parser.y:258
-		{
-			yyVAL.node = intr.NewSubNode(yyDollar[1].node, yyDollar[3].node)
-		}
-	case 30:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:263
-		{
-			yyVAL.node = yyDollar[1].node
-		}
-	case 31:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line parser.y:270
-		{
-			yyVAL.node = intr.NewMulNode(yyDollar[1].node, yyDollar[3].node)
-
-		}
-	case 32:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line parser.y:275
-		{
-			yyVAL.node = intr.NewDivNode(yyDollar[1].node, yyDollar[3].node)
-		}
-	case 33:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line parser.y:279
-		{
-			yyVAL.node = intr.NewAndNode(yyDollar[1].node, yyDollar[3].node)
-		}
-	case 34:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:283
-		{
-			yyVAL.node = intr.NewToBooleanCastNode(yyDollar[2].node)
-		}
-	case 35:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line parser.y:287
-		{
-			yyVAL.node = intr.NewToIntegerCastNode(yyDollar[2].node)
-		}
-	case 36:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:292
-		{
-			yyVAL.node = yyDollar[1].node
-		}
-	case 37:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:299
-		{
-			yyVAL.node = intr.NewBooleanNode(yyDollar[1].boolean)
-		}
-	case 38:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:303
-		{
-			yyVAL.node = intr.NewBooleanNode(yyDollar[1].boolean)
-		}
-	case 39:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line parser.y:307
-		{
-			yyVAL.node = intr.NewIntegerNode(yyDollar[1].num)
-
-		}
-	case 40:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line parser.y:312
 		{
 			yyVAL.node = yyDollar[2].node
 		}
-	case 41:
+	case 20:
 		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:226
+		{
+			yyVAL.dType = yyDollar[1].dType
+		}
+	case 21:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:230
+		{
+			yyVAL.dType = yyDollar[1].dType
+		}
+	case 22:
+		yyDollar = yyS[yypt-9 : yypt+1]
+//line parser.y:237
+		{
+			var res intr.Variable = nil
+			if yyDollar[1].dType == intr.Int {
+				res = intr.NewVariableInt(0)
+			}
+			if yyDollar[1].dType == intr.Bool {
+				res = intr.NewVariableBool(false)
+			}
+			yyVAL.node = intr.NewFunctionDeclNode(yyDollar[3].str, yyDollar[5].params.types, yyDollar[5].params.names, res, yyDollar[8].node)
+		}
+	case 23:
+		yyDollar = yyS[yypt-4 : yypt+1]
+//line parser.y:251
+		{
+			names := yyDollar[1].params.names
+			types := yyDollar[1].params.types
+			names = append(names, yyDollar[4].str)
+			if yyDollar[3].dType == intr.Int {
+				types = append(types, intr.NewVariableInt(0))
+			}
+			if yyDollar[3].dType == intr.Bool {
+				types = append(types, intr.NewVariableBool(false))
+			}
+
+			yyVAL.params = paramStruct{names, types}
+		}
+	case 24:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:265
+		{
+			names := []string{}
+			types := []intr.Variable{}
+			names = append(names, yyDollar[2].str)
+			if yyDollar[1].dType == intr.Int {
+				types = append(types, intr.NewVariableInt(0))
+			}
+			if yyDollar[1].dType == intr.Bool {
+				types = append(types, intr.NewVariableBool(false))
+			}
+
+			yyVAL.params = paramStruct{names, types}
+		}
+	case 25:
+		yyDollar = yyS[yypt-4 : yypt+1]
+//line parser.y:281
+		{
+			nodes := append(yyDollar[1].nodeList, yyDollar[3].node)
+			yyVAL.nodeList = nodes
+		}
+	case 26:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:286
+		{
+			nodes := []intr.AstNode{}
+			nodes = append(nodes, yyDollar[2].node)
+			yyVAL.nodeList = nodes
+		}
+	case 27:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:294
+		{
+			nodes := append(yyDollar[1].nodeList, yyDollar[3].node)
+			yyVAL.nodeList = nodes
+		}
+	case 28:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:299
+		{
+			nodes := []intr.AstNode{}
+			nodes = append(nodes, yyDollar[1].node)
+			yyVAL.nodeList = nodes
+		}
+	case 29:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:308
+		{
+			yyVAL.node = intr.NewEqReduceNode(yyDollar[1].node)
+		}
+	case 30:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:312
+		{
+			yyVAL.node = intr.NewLtReduceNode(yyDollar[1].node)
+		}
+	case 31:
+		yyDollar = yyS[yypt-2 : yypt+1]
 //line parser.y:316
+		{
+			yyVAL.node = intr.NewLteReduceNode(yyDollar[1].node)
+		}
+	case 32:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:320
+		{
+			yyVAL.node = intr.NewGtReduceNode(yyDollar[1].node)
+		}
+	case 33:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:324
+		{
+			yyVAL.node = intr.NewGteReduceNode(yyDollar[1].node)
+		}
+	case 34:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:328
+		{
+			yyVAL.node = intr.NewEqMapNode(yyDollar[1].node)
+		}
+	case 35:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:332
+		{
+			yyVAL.node = intr.NewLtMapNode(yyDollar[1].node)
+		}
+	case 36:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:336
+		{
+			yyVAL.node = intr.NewLteMapNode(yyDollar[1].node)
+		}
+	case 37:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:340
+		{
+			yyVAL.node = intr.NewGtMapNode(yyDollar[1].node)
+		}
+	case 38:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:344
+		{
+			yyVAL.node = intr.NewGteMapNode(yyDollar[1].node)
+		}
+	case 39:
+		yyDollar = yyS[yypt-5 : yypt+1]
+//line parser.y:348
+		{
+			yyVAL.node = intr.NewFunctionCallNode(yyDollar[2].str, yyDollar[4].nodeList)
+		}
+	case 40:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:352
+		{
+			yyVAL.node = yyDollar[1].node
+		}
+	case 41:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:359
+		{
+			yyVAL.node = intr.NewAddNode(yyDollar[1].node, yyDollar[3].node)
+		}
+	case 42:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:363
+		{
+			yyVAL.node = intr.NewSubNode(yyDollar[1].node, yyDollar[3].node)
+		}
+	case 43:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:368
+		{
+			yyVAL.node = yyDollar[1].node
+		}
+	case 44:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:375
+		{
+			yyVAL.node = intr.NewMulNode(yyDollar[1].node, yyDollar[3].node)
+		}
+	case 45:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:380
+		{
+			yyVAL.node = intr.NewDivNode(yyDollar[1].node, yyDollar[3].node)
+		}
+	case 46:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:384
+		{
+			yyVAL.node = intr.NewAndNode(yyDollar[1].node, yyDollar[3].node)
+		}
+	case 47:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:388
+		{
+			yyVAL.node = intr.NewToBooleanCastNode(yyDollar[2].node)
+		}
+	case 48:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:392
+		{
+			yyVAL.node = intr.NewToIntegerCastNode(yyDollar[2].node)
+		}
+	case 49:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:397
+		{
+			yyVAL.node = yyDollar[1].node
+		}
+	case 50:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:404
+		{
+			yyVAL.node = intr.NewBooleanNode(yyDollar[1].boolean)
+		}
+	case 51:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:408
+		{
+			yyVAL.node = intr.NewBooleanNode(yyDollar[1].boolean)
+		}
+	case 52:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:412
+		{
+			yyVAL.node = intr.NewIntegerNode(yyDollar[1].num)
+		}
+	case 53:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line parser.y:417
+		{
+			yyVAL.node = yyDollar[2].node
+		}
+	case 54:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line parser.y:421
+		{
+			yyVAL.node = intr.NewArrayElemNode(yyDollar[2].nodeList, yyDollar[1].str)
+		}
+	case 55:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line parser.y:425
 		{
 			yyVAL.node = intr.NewNameNode(yyDollar[1].str)
 		}

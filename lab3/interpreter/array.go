@@ -25,8 +25,11 @@ func (v *VarArray) Print() {
 		fmt.Printf("[%d]", size)
 	}
 	fmt.Printf("={")
-	for _, elem := range v.data {
+	for i, elem := range v.data {
 		elem.(Printer).Print()
+		if i != len(v.data)-1 {
+			fmt.Printf(", ")
+		}
 	}
 	fmt.Printf("}")
 }
@@ -62,15 +65,14 @@ func (v *VarArray) At(indices []int) (Variable, int, error) {
 		indices[i] = indices[i] - 1
 	}
 
-	resultIndex := indices[len(indices)-1]
-	if resultIndex > v.sizes[len(v.sizes)-1] {
-		return nil, 0, fmt.Errorf("%w: idx[%d] = %d, dim[%d] = %d", ErrArrayOutOfRange, len(indices)-1, resultIndex, len(indices)-1, v.sizes[len(indices)-1])
-	}
+	resultIndex := 0
+	factor := 1
 	for i := len(indices) - 1; i >= 0; i-- {
-		if v.sizes[i] < indices[i] {
+		if v.sizes[i] < indices[i] || indices[i] < 0 {
 			return nil, 0, fmt.Errorf("%w: idx[%d] = %d, dim[%d] = %d", ErrArrayOutOfRange, i, indices[i], i, v.sizes[i])
 		}
-		resultIndex = resultIndex*v.sizes[i] + indices[i]
+		resultIndex += indices[i] * factor
+		factor *= v.sizes[i]
 	}
 	return v.data[resultIndex], resultIndex, nil
 }
@@ -123,20 +125,42 @@ func (v *VarArray) Copy() Variable {
 	return &VarArray{newSizes, newData, v.dataT}
 }
 
-type ArrayElemNode struct {
-	indices []int
-	array   AstNode
+func convertSizes(gotSizes []AstNode, scope *Scope) ([]int, error) {
+	sizes := make([]int, len(gotSizes))
+	for i, sizeNode := range gotSizes {
+		s, err := sizeNode.Eval(scope)
+		if err != nil {
+			return nil, err
+		}
+		if s.Type() != Int {
+			return nil, ErrSizeNotInt
+		}
+		sizes[i] = s.(*Integer).Data()
+	}
+	return sizes, nil
 }
 
-func NewArrayElemNode(indices []int, array AstNode) *ArrayElemNode {
-	return &ArrayElemNode{indices, array}
+type ArrayElemNode struct {
+	indices []AstNode
+	name    string
+}
+
+func NewArrayElemNode(indices []AstNode, name string) *ArrayElemNode {
+	return &ArrayElemNode{indices, name}
 }
 
 func (node *ArrayElemNode) Eval(scope *Scope) (Variable, error) {
-	arr, err := node.array.Eval(scope)
+	arr, err := scope.FindVariableDepth(node.name)
 	if err != nil {
 		return nil, err
 	}
-	res, _, err := arr.(*VarArray).At(node.indices)
+	if _, ok := arr.(*VarArray); !ok {
+		return nil, fmt.Errorf("%w: '%s'", ErrNotAVectorType, node.name)
+	}
+	indices, err := convertSizes(node.indices, scope)
+	if err != nil {
+		return nil, err
+	}
+	res, _, err := arr.(*VarArray).At(indices)
 	return res, err
 }

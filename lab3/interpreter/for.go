@@ -52,7 +52,7 @@ func (node *ForStatementNode) Eval(scope *Scope) (Variable, error) {
 	}
 	for i := counter.Data(); predicate(i, stopper.Data()); i += stepper.Data() {
 		counter.data = i
-		childScope := NewScope(scope)
+		childScope := NewScope(scope, scope.globalScope)
 		res, err := node.doThis.Eval(&childScope)
 		if err != nil {
 			return nil, err

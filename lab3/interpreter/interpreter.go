@@ -7,15 +7,16 @@ import (
 
 type Interpreter struct {
 	root        AstNode
-	globalScope *Scope
+	globalScope *GlobalScope
+	functions   map[string]*FunctionDeclNode
 	CallStack
 }
 
 func NewInterpreter(treeRoot AstNode) *Interpreter {
-	globalScope := NewScope(nil)
-
-	intr := &Interpreter{treeRoot, &globalScope, NewCallStack()}
-	intr.scopeStack = append(intr.scopeStack, &globalScope)
+	globalScope := NewGlobalScope()
+	globalScope.scope.globalScope = globalScope
+	intr := &Interpreter{treeRoot, globalScope, make(map[string]*FunctionDeclNode), NewCallStack()}
+	intr.scopeStack = append(intr.scopeStack, globalScope.scope)
 	return intr
 }
 
