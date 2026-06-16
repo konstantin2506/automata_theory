@@ -6,14 +6,21 @@ import (
 	"fmt"
 )
 
+type Game interface {
+	Move(n int) error
+	Surroundings() [3][][2]bool
+	Rotate(n int)
+}
+
 type GlobalScope struct {
 	scope     *Scope
 	functions map[string]*FunctionDeclNode
+	game      Game
 }
 
-func NewGlobalScope() *GlobalScope {
+func NewGlobalScope(game Game) *GlobalScope {
 	scope := NewScope(nil, nil)
-	return &GlobalScope{&scope, make(map[string]*FunctionDeclNode)}
+	return &GlobalScope{&scope, make(map[string]*FunctionDeclNode), game}
 }
 
 type Scope struct {

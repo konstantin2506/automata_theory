@@ -1,14 +1,38 @@
+logic routing canGoI(digit p, logic surr[3][1][2]){
 
-
-
-digit routing factorial(digit n){
-    check n - 1 eq then {
-        return 1;
-    }
-    
-    return n * perform factorial(n - 1);
+    return !surr[p][1][1];
 }
 digit routing pathfinder(digit argc){
-    print(perform factorial(10));
+    digit i = 0;
+    digit j = 2000;
+    digit k = 1;
+    digit n = 1;
+    for i stop j step k{
+        logic notPassed = true;
+        print(67);
+        check (perform canGoI(3, surroundings)) then{
+            rotate 1;
+            move 1;
+            notPassed = false;
+        }
+        check notPassed && (perform canGoI(2, surroundings)) then{
+            move(1);
+            notPassed = false;
+        }
+        check notPassed && (perform canGoI(1, surroundings)) then{
+            rotate -1;
+            move 1;
+            notPassed = false;
+        }
+        check notPassed then{
+            rotate 3;
+        }
+
+        i = i - 1;
+        n = n + 1;
+        print(n);
+
+    }
+        
     return 0;
 }

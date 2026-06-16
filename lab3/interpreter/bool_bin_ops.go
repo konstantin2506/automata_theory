@@ -10,6 +10,7 @@ type BinBoolOpT int
 const (
 	And BinBoolOpT = iota
 	Or
+	Not
 )
 
 var ErrOperandIsNotBoolean = errors.New("operand must be boolean")
@@ -17,6 +18,7 @@ var ErrOperandIsNotBoolean = errors.New("operand must be boolean")
 var boolBinOpNames = map[BinBoolOpT]string{
 	And: "and",
 	Or:  "or",
+	Not: "!(not)",
 }
 
 func BinOpName(op BinBoolOpT) string {
@@ -36,6 +38,10 @@ func NewAndNode(left, right AstNode) *BinBoolOpNode {
 
 func NewOrNode(left, right AstNode) *BinBoolOpNode {
 	return &BinBoolOpNode{left, right, func(l, r bool) bool { return l || r }, Or}
+}
+
+func NewNotNode(node AstNode) *BinBoolOpNode {
+	return &BinBoolOpNode{node, node, func(l, r bool) bool { return !l }, Not}
 }
 
 func BoolOp(v, other *VarArray, predicate func(bool, bool) bool) (Variable, error) {

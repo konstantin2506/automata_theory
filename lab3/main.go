@@ -6,7 +6,10 @@ import (
 	"log"
 	"os"
 
+	game "lab3/game"
 	intr "lab3/interpreter"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func main() {
@@ -32,5 +35,14 @@ func main() {
 	}
 
 	interpreter := intr.NewInterpreter(astRoot)
-	intr.Interpret(interpreter)
+	ebiten.SetWindowTitle("Шестиугольный лабиринт 30x30")
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled) // разрешить изменение размера
+	ebiten.SetFullscreen(true)                                     // полноэкранный режим
+	gm := game.NewGame()
+	ctrl := game.NewController(gm)
+
+	go intr.Interpret(interpreter, &ctrl)
+	if err := ebiten.RunGame(gm); err != nil {
+		log.Fatal(err)
+	}
 }

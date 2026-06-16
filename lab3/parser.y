@@ -19,6 +19,7 @@ type paramStruct struct{
 
 %union {
 	num int
+    numSlice []int
     str string
     boolean bool
     dType intr.VarT
@@ -109,10 +110,11 @@ type paramStruct struct{
 %token <num> OCTAL;
 %token <num> DECIMAL;
 
-%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement if_statement for_statement variable_assign_statement function_decl_statement return_statement
+%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement rotate_statement move_statement  if_statement for_statement variable_assign_statement function_decl_statement return_statement
 %type <dType> variable_type
 %type <nodeList> dimension arguments
 %type <params> params_names 
+%type <numSlice> dim_int
 %%
 
 top:
@@ -164,6 +166,14 @@ statement:
         $$ = $1
     }
 |   return_statement
+    {
+        $$ = $1
+    }
+|   rotate_statement
+    {
+        $$ = $1
+    }
+|   move_statement
     {
         $$ = $1
     }
@@ -246,6 +256,18 @@ function_decl_statement:
     }
     
 ;
+rotate_statement:
+     ROTATE_OPERATOR factor STATEMENT_END
+    {
+        $$ = intr.NewRotateNode($2)
+    }
+;
+move_statement:
+    MOVE_OPERATOR expr STATEMENT_END
+    {
+        $$ = intr.NewMoveNode($2)
+    }
+; 
 params_names:
     params_names COMMA variable_type NAME
     {
@@ -261,6 +283,22 @@ params_names:
 
         $$ = paramStruct{names, types}
     }
+|   params_names COMMA variable_type NAME dim_int
+    {
+        names := $1.names
+        types := $1.types
+        names = append(names, $4)
+        if $3 == intr.Int{
+            arr, _ := intr.NewArray($5, intr.NewVariableInt(0))
+            types = append(types, arr)
+        }
+        if $3 == intr.Bool{
+            arr, _ := intr.NewArray($5, intr.NewVariableBool(false))
+            types = append(types, arr)
+        }
+
+        $$ = paramStruct{names, types}
+    } 
 |   variable_type NAME
     {
         names := []string{}
@@ -274,6 +312,34 @@ params_names:
         }
 
         $$ = paramStruct{names, types}
+    }
+|   variable_type NAME dim_int
+    {
+        names := []string{}
+        types := []intr.Variable{}
+        names = append(names, $2)
+        if $1 == intr.Int{
+            arr, _ := intr.NewArray($3, intr.NewVariableInt(0))
+            types = append(types, arr)
+        }
+        if $1 == intr.Bool{
+            arr, _ := intr.NewArray($3, intr.NewVariableBool(false))
+            types = append(types, arr)
+        }
+
+        $$ = paramStruct{names, types}
+    }
+;
+dim_int:
+    dim_int SQUARE_BRACE_LEFT DECIMAL SQUARE_BRACE_RIGHT
+    {
+        vec := $1
+        vec = append(vec, $3)
+        $$ = vec
+    }
+|   SQUARE_BRACE_LEFT DECIMAL SQUARE_BRACE_RIGHT
+    {
+        $$ = []int{$2}
     }
 ;
 dimension:
@@ -360,6 +426,7 @@ term:
         $$ = intr.NewSubNode($1, $3)
     }
 
+
 |   factor
     {
         $$ = $1
@@ -390,6 +457,11 @@ factor:
     }
 
 
+|   NOT basic_part_ar
+    {
+        $$ = intr.NewNotNode($2)
+    }
+
 |   basic_part_ar
     {
         $$ = $1
@@ -417,6 +489,10 @@ basic_part_ar:
 |   FUNCTION_CALL NAME DEFAULT_BRACE_LEFT arguments DEFAULT_BRACE_RIGHT
     {
         $$ = intr.NewFunctionCallNode($2, $4)
+    }
+|   SURROUNDINGS
+    {
+        $$ = intr.NewSurrNode()
     }
 |   NAME dimension
     {

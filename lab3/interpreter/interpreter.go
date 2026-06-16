@@ -11,13 +11,18 @@ type Interpreter struct {
 }
 
 func NewInterpreter(treeRoot AstNode) *Interpreter {
-	globalScope := NewGlobalScope()
+	globalScope := NewGlobalScope(nil)
 	globalScope.scope.globalScope = globalScope
 	intr := &Interpreter{treeRoot, globalScope, make(map[string]*FunctionDeclNode)}
 	return intr
 }
 
-func Interpret(intr *Interpreter) {
+func (intr *Interpreter) SetGame(game Game) {
+	intr.globalScope.game = game
+}
+
+func Interpret(intr *Interpreter, game Game) {
+	intr.SetGame(game)
 	_, err := intr.root.Eval(intr.globalScope.scope)
 	if err != nil {
 		fmt.Printf("[Yucky]: program finished with error: %s\n", err.Error())
