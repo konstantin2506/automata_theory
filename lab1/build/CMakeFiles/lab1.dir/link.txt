@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/lab1.dir/link.d CMakeFiles/lab1.dir/main.cpp.o -o lab1  line_logger/libline_logger.a line_checker/lex/liblex_line_checker.a line_checker/regex_impl/libregex_line_checker.a line_checker/smc/libsmc_line_checker.a

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libline_logger.a CMakeFiles/line_logger.dir/src/line_logger.cpp.o
-/usr/bin/ranlib libline_logger.a

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libregex_line_checker.a CMakeFiles/regex_line_checker.dir/src/regex_line_checker.cpp.o
-/usr/bin/ranlib libregex_line_checker.a

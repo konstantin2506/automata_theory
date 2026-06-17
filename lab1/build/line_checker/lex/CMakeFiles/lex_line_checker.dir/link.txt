@@ -1,2 +1,0 @@
-/usr/bin/ar qc liblex_line_checker.a CMakeFiles/lex_line_checker.dir/src/test.cpp.o CMakeFiles/lex_line_checker.dir/src/lex_line_checker.cpp.o
-/usr/bin/ranlib liblex_line_checker.a
