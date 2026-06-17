@@ -1,4 +1,3 @@
-// main.go
 package game
 
 import (
@@ -16,14 +15,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-// Размер лабиринта
 const (
 	gridW     = 30
 	gridH     = 30
-	btnHeight = 80 // высота панели с кнопками
+	btnHeight = 80
 )
 
-// Направления в аксиальных координатах (pointy-top)
 var dirs = [6][2]int{
 	{1, 0},
 	{0, 1},
@@ -43,7 +40,6 @@ type Game struct {
 	won      bool
 	message  string
 
-	// Динамические размеры
 	windowW   int
 	windowH   int
 	originX   float64
@@ -67,7 +63,6 @@ type button struct {
 
 func NewGame() *Game {
 	g := &Game{}
-	// Начальный размер до первого Layout
 	g.moveCh = make(chan struct{})
 	g.surrCh = make(chan struct{})
 	g.rotateCh = make(chan int)
@@ -89,29 +84,25 @@ func (g *Game) regenerate() {
 	g.message = ""
 }
 
-// Пересчёт всех координат при изменении размера окна
 func (g *Game) resize(width, height int) {
 	g.windowW = width
 	g.windowH = height
 
-	// Доступное пространство под лабиринт (оставляем место для кнопок)
 	mazeAreaHeight := height - btnHeight
 	if mazeAreaHeight < 100 {
 		mazeAreaHeight = 100
 	}
-	// Максимально возможный радиус соты, чтобы вписать сетку
-	// Ширина лабиринта в координатах: (gridW-1)*sqrt3 + (gridH-1)*sqrt3/2 + 2
+
 	reqW := math.Sqrt(3)*(float64(gridW-1)+float64(gridH-1)*0.5) + 2
 	reqH := 1.5*float64(gridH-1) + 2
 	scaleW := float64(width-20) / reqW
 	scaleH := float64(mazeAreaHeight-20) / reqH
 	scale := math.Min(scaleW, scaleH)
 	if scale < 5 {
-		scale = 5 // минимальный размер
+		scale = 5
 	}
 	g.hexRadius = math.Floor(scale)
 
-	// Вычисляем origin так, чтобы лабиринт был по центру выделенной области
 	totalW := (math.Sqrt(3) * (float64(gridW-1) + float64(gridH-1)*0.5)) * g.hexRadius
 	totalH := (1.5 * float64(gridH-1)) * g.hexRadius
 	g.originX = float64(width)*0.5 - totalW*0.5 + g.hexRadius
@@ -132,11 +123,9 @@ func (g *Game) resize(width, height int) {
 		{startX + 3*(btnW+spacing), btnY, btnW, btnH, "Reset", func() { g.regenerate() }},
 	}
 
-	// Пересоздаём буфер изображения
 	g.img = image.NewRGBA(image.Rect(0, 0, width, height))
 }
 
-// API робота (без изменений)
 func (g *Game) Move(n int) error {
 	if !g.alive || g.won {
 		return errors.New("игра уже окончена")
@@ -171,15 +160,12 @@ func (g *Game) Rotate(sectors int) {
 	fmt.Println("Surroundings: ", g.Surroundings()[0][0][0], g.Surroundings()[1][0][0], g.Surroundings()[2][0][0])
 }
 
-// Surroundings возвращает обзор в трёх направлениях: [leftForward, forward, rightForward].
-// Каждый слайс содержит до 5 элементов (дистанция 1..5).
-// Элемент [2]bool: [isWall, isExit].
 func (g *Game) Surroundings() [3][][2]bool {
 	res := [3][][2]bool{}
 	directions := [3]int{
-		(g.robotDir - 1 + 6) % 6, // left-forward
-		g.robotDir,               // forward
-		(g.robotDir + 1) % 6,     // right-forward
+		(g.robotDir - 1 + 6) % 6,
+		g.robotDir,
+		(g.robotDir + 1) % 6,
 	}
 	for i, d := range directions {
 		view := make([][2]bool, 5)
@@ -187,10 +173,10 @@ func (g *Game) Surroundings() [3][][2]bool {
 			q := g.robotPos[0] + dirs[d][0]*dist
 			r := g.robotPos[1] + dirs[d][1]*dist
 			if q < 0 || r < 0 || q >= gridW || r >= gridH || g.maze[r][q] {
-				view[dist-1] = [2]bool{true, false} // стена есть, выхода нет
+				view[dist-1] = [2]bool{true, false}
 			} else {
 				isExit := q == g.exit[0] && r == g.exit[1]
-				view[dist-1] = [2]bool{false, isExit} // нет стены, может быть выход
+				view[dist-1] = [2]bool{false, isExit}
 			}
 		}
 		res[i] = view
@@ -199,34 +185,33 @@ func (g *Game) Surroundings() [3][][2]bool {
 }
 
 /*
-func (g *Game) Surroundings() [3][][2]int {
-	res := [3][][2]int{}
-	directions := [3]int{
-		(g.robotDir - 1 + 6) % 6,
-		g.robotDir,
-		(g.robotDir + 1) % 6,
-	}
-	for i, d := range directions {
-		view := make([][2]int, 5)
-		for dist := 1; dist <= 5; dist++ {
-			q := g.robotPos[0] + dirs[d][0]*dist
-			r := g.robotPos[1] + dirs[d][1]*dist
-			if q < 0 || r < 0 || q >= gridW || r >= gridH || g.maze[r][q] {
-				view[dist-1] = [2]int{1, 0}
-			} else {
-				exitFlag := 0
-				if q == g.exit[0] && r == g.exit[1] {
-					exitFlag = 1
-				}
-				view[dist-1] = [2]int{0, exitFlag}
-			}
+	func (g *Game) Surroundings() [3][][2]int {
+		res := [3][][2]int{}
+		directions := [3]int{
+			(g.robotDir - 1 + 6) % 6,
+			g.robotDir,
+			(g.robotDir + 1) % 6,
 		}
-		res[i] = view
+		for i, d := range directions {
+			view := make([][2]int, 5)
+			for dist := 1; dist <= 5; dist++ {
+				q := g.robotPos[0] + dirs[d][0]*dist
+				r := g.robotPos[1] + dirs[d][1]*dist
+				if q < 0 || r < 0 || q >= gridW || r >= gridH || g.maze[r][q] {
+					view[dist-1] = [2]int{1, 0}
+				} else {
+					exitFlag := 0
+					if q == g.exit[0] && r == g.exit[1] {
+						exitFlag = 1
+					}
+					view[dist-1] = [2]int{0, exitFlag}
+				}
+			}
+			res[i] = view
+		}
+		return res
 	}
-	return res
-}
 */
-// Генерация лабиринта (граница – стена, старт и выход внутри)
 func generateMaze(w, h int) ([][]bool, [2]int, [2]int) {
 	maze := make([][]bool, h)
 	for r := range maze {
@@ -235,7 +220,6 @@ func generateMaze(w, h int) ([][]bool, [2]int, [2]int) {
 			maze[r][q] = true
 		}
 	}
-	// Случайная внутренняя клетка для старта
 	startQ := rand.Intn(w-2) + 1
 	startR := rand.Intn(h-2) + 1
 	start := [2]int{startQ, startR}
@@ -289,7 +273,6 @@ func generateMaze(w, h int) ([][]bool, [2]int, [2]int) {
 		}
 	}
 
-	// Выход – любая открытая внутренняя клетка кроме старта
 	var openCells []cell
 	for r := 1; r < h-1; r++ {
 		for q := 1; q < w-1; q++ {
@@ -300,7 +283,6 @@ func generateMaze(w, h int) ([][]bool, [2]int, [2]int) {
 	}
 	exit := [2]int{}
 	if len(openCells) == 0 {
-		// fallback
 		for _, d := range dirs {
 			nq, nr := startQ+d[0], startR+d[1]
 			if nq >= 1 && nr >= 1 && nq < w-1 && nr < h-1 {
@@ -316,7 +298,6 @@ func generateMaze(w, h int) ([][]bool, [2]int, [2]int) {
 	return maze, start, exit
 }
 
-// Layout – возвращаем текущий размер окна и при изменении вызываем resize
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	if outsideWidth != g.windowW || outsideHeight != g.windowH {
 		g.resize(outsideWidth, outsideHeight)
@@ -325,7 +306,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) Update() error {
-	// Мышь
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		mx, my := ebiten.CursorPosition()
 		for _, btn := range g.buttons {
@@ -336,7 +316,6 @@ func (g *Game) Update() error {
 		}
 	}
 
-	// Клавиши
 	if ebiten.IsKeyPressed(ebiten.KeyR) {
 		g.regenerate()
 		return nil
@@ -378,7 +357,6 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// Заливка фона
 	bg := color.RGBA{30, 30, 30, 255}
 	for y := 0; y < g.windowH; y++ {
 		for x := 0; x < g.windowW; x++ {
@@ -388,7 +366,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	r := g.hexRadius
 
-	// Отрисовка сот
 	for row := 0; row < gridH; row++ {
 		for col := 0; col < gridW; col++ {
 			cx := g.originX + r*(math.Sqrt(3)*float64(col)+math.Sqrt(3)/2*float64(row))
@@ -408,13 +385,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	// Робот
 	robotCX := g.originX + r*(math.Sqrt(3)*float64(g.robotPos[0])+math.Sqrt(3)/2*float64(g.robotPos[1]))
 	robotCY := g.originY + r*1.5*float64(g.robotPos[1])
 	robotColor := color.RGBA{60, 120, 255, 255}
 	drawFilledCircle(g.img, robotCX, robotCY, r*0.45, robotColor)
 
-	// Направление
 	if g.alive || g.won {
 		dir := dirs[g.robotDir]
 		nx := g.originX + r*(math.Sqrt(3)*float64(g.robotPos[0]+dir[0])+math.Sqrt(3)/2*float64(g.robotPos[1]+dir[1]))
@@ -430,16 +405,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	// Кнопки
 	for _, btn := range g.buttons {
-		// Фон кнопки
 		btnCol := color.RGBA{70, 70, 70, 255}
 		for y := btn.y; y < btn.y+btn.h; y++ {
 			for x := btn.x; x < btn.x+btn.w; x++ {
 				g.img.Set(x, y, btnCol)
 			}
 		}
-		// Рамка
 		white := color.RGBA{255, 255, 255, 255}
 		for y := btn.y; y <= btn.y+btn.h; y++ {
 			g.img.Set(btn.x, y, white)
@@ -449,13 +421,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.img.Set(x, btn.y, white)
 			g.img.Set(x, btn.y+btn.h, white)
 		}
-		// Текст кнопки (через стандартный вывод отладки не очень – используем ebitenutil)
-		// Текст на кнопке будет нарисован в следующем блоке через ebitenutil
 	}
 
 	screen.ReplacePixels(g.img.Pix)
 
-	// Отладочный текст и подписи кнопок
 	status := "Жив"
 	if g.won {
 		status = "Победил!"
@@ -467,12 +436,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.message != "" {
 		msg += "\n" + g.message
 	}
-	msg += "\nУправление: [↑] Move  [←] Rot -1  [→] Rot +1  [R] рестарт"
-	ebitenutil.DebugPrint(screen, msg)
+	// msg += "\nУправление: [↑] Move  [←] Rot -1  [→] Rot +1  [R] рестарт"
+	// ebitenutil.DebugPrint(screen, msg)
 
-	// Подписи кнопок (поверх кнопок)
 	for _, btn := range g.buttons {
-		// Грубо, но текст будет виден
 		ebitenutil.DebugPrintAt(screen, btn.label, btn.x+10, btn.y+btn.h/2-8)
 	}
 }
@@ -610,8 +577,8 @@ func get3Walls(surr [3][][2]bool) [3]bool {
 
 func main() {
 	ebiten.SetWindowTitle("Шестиугольный лабиринт 30x30")
-	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled) // разрешить изменение размера
-	ebiten.SetFullscreen(true)                                     // полноэкранный режим
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.SetFullscreen(true)
 	game := NewGame()
 	go alg(game)
 	if err := ebiten.RunGame(game); err != nil {

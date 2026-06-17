@@ -103,11 +103,10 @@ func (fn *FunctionCallNode) Eval(scope *Scope) (Variable, error) {
 	if err != nil {
 		return nil, err
 	}
-	if fn.function.result == nil {
-		if result != nil {
-			return nil, fmt.Errorf("%w: want=None, got=%s", ErrFunctionResultTypesDiffer, TypeName(result.Type()))
-		}
-	} else {
+	if result == nil {
+		return nil, fmt.Errorf("%w: name='%s'", ErrFunctionWithoutReturn, fn.functionName)
+	}
+	if fn.function.result != nil {
 		if result.Type() != fn.function.result.Type() {
 			return nil, fmt.Errorf("%w: want=%s, got=%s", ErrFunctionResultTypesDiffer, TypeName(fn.function.result.Type()), TypeName(result.Type()))
 		}

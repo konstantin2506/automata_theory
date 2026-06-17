@@ -8,12 +8,13 @@ type Interpreter struct {
 	root        AstNode
 	globalScope *GlobalScope
 	functions   map[string]*FunctionDeclNode
+	good        int
 }
 
-func NewInterpreter(treeRoot AstNode) *Interpreter {
+func NewInterpreter(treeRoot AstNode, good int) *Interpreter {
 	globalScope := NewGlobalScope(nil)
 	globalScope.scope.globalScope = globalScope
-	intr := &Interpreter{treeRoot, globalScope, make(map[string]*FunctionDeclNode)}
+	intr := &Interpreter{treeRoot, globalScope, make(map[string]*FunctionDeclNode), good}
 	return intr
 }
 

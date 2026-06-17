@@ -3,6 +3,7 @@ package interpreter
 import (
 	"errors"
 	"fmt"
+	"slices"
 )
 
 var (
@@ -34,39 +35,94 @@ func findInt(scope *Scope, targetName string, errType error) (*Integer, error) {
 }
 
 func (node *ForStatementNode) Eval(scope *Scope) (Variable, error) {
-	counter, err := findInt(scope, node.counterName, ErrLoopCounterNotInt)
+	counterFound, err := scope.FindVariableDepth(node.counterName)
 	if err != nil {
 		return nil, err
 	}
-	stopper, err := findInt(scope, node.stopperName, ErrLoopStopperNotInt)
+	stepperFound, err := scope.FindVariableDepth(node.stepperName)
 	if err != nil {
 		return nil, err
 	}
-	stepper, err := findInt(scope, node.stepperName, ErrLoopStepperNotInt)
+	stopperFound, err := scope.FindVariableDepth(node.stopperName)
 	if err != nil {
 		return nil, err
 	}
-	predicate := func(x, y int) bool { return x < y }
-	if stepper.Data() < 0 {
-		predicate = func(x, y int) bool { return x > y }
-	}
-	for i := counter.Data(); predicate(i, stopper.Data()); i += stepper.Data() {
-		counter.data = i
-		childScope := NewScope(scope, scope.globalScope)
-		res, err := node.doThis.Eval(&childScope)
+
+	ok := counterFound.Type() == Array && stopperFound.Type() == Array && stepperFound.Type() == Array
+	if ok && counterFound.(*VarArray).InnerType() == Int && stepperFound.(*VarArray).InnerType() == Int && stopperFound.(*VarArray).InnerType() == Int {
+		c := counterFound.(*VarArray)
+		ste := stepperFound.(*VarArray)
+		sto := stopperFound.(*VarArray)
+		if slices.Equal(c.sizes, ste.sizes) && slices.Equal(c.sizes, sto.sizes) {
+			counterData := 0
+			stopperData := 0
+			stepperData := 0
+			for i := range c.data {
+				counterData = c.data[i].(*Integer).Data()
+				stopperData = sto.data[i].(*Integer).Data()
+				stepperData = ste.data[i].(*Integer).Data()
+				predicate := func(x, y int) bool { return x < y }
+				if stepperData < 0 {
+					predicate = func(x, y int) bool { return x > y }
+				}
+				for i := counterData; predicate(i, stopperData); i += stepperData {
+					c.data[i].(*Integer).data = i
+					childScope := NewScope(scope, scope.globalScope)
+					res, err := node.doThis.Eval(&childScope)
+					if err != nil {
+						return nil, err
+					}
+					if res != nil {
+						err := scope.AssignScalar(node.counterName, NewVariableInt(i*stepperData))
+						if err != nil {
+							return nil, err
+						}
+						return res, nil
+					}
+
+				}
+
+			}
+		} else {
+			return nil, ErrVarInvalidType
+		}
+	} else {
+
+		counter, err := findInt(scope, node.counterName, ErrLoopCounterNotInt)
 		if err != nil {
 			return nil, err
 		}
-		if res != nil {
-			err := scope.AssignScalar(node.counterName, NewVariableInt(i*stepper.Data()))
+		stopper, err := findInt(scope, node.stopperName, ErrLoopStopperNotInt)
+		if err != nil {
+			return nil, err
+		}
+		stepper, err := findInt(scope, node.stepperName, ErrLoopStepperNotInt)
+		if err != nil {
+			return nil, err
+		}
+		predicate := func(x, y int) bool { return x < y }
+		if stepper.Data() < 0 {
+			predicate = func(x, y int) bool { return x > y }
+		}
+		for i := counter.Data(); predicate(i, stopper.Data()); i += stepper.Data() {
+			counter.data = i
+			childScope := NewScope(scope, scope.globalScope)
+			res, err := node.doThis.Eval(&childScope)
 			if err != nil {
 				return nil, err
 			}
-			return res, nil
+			if res != nil {
+				err := scope.AssignScalar(node.counterName, NewVariableInt(i*stepper.Data()))
+				if err != nil {
+					return nil, err
+				}
+				return res, nil
+			}
+
 		}
+		// err = scope.AssignScalar(node.counterName, NewVariableInt(stopper.Data()*stepper.Data()))
 
+		return nil, nil
 	}
-	// err = scope.AssignScalar(node.counterName, NewVariableInt(stopper.Data()*stepper.Data()))
-
 	return nil, nil
 }

@@ -29,12 +29,14 @@ func main() {
 	lexer.current = lexer.getc()
 	yyParse(lexer)
 	astRoot := GetRoot()
+	good := GetGood()
+	fmt.Println("good:", good)
 	if astRoot == nil {
 		fmt.Printf("nil root\n")
 		return
 	}
 
-	interpreter := intr.NewInterpreter(astRoot)
+	interpreter := intr.NewInterpreter(astRoot, good)
 	ebiten.SetWindowTitle("Шестиугольный лабиринт 30x30")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled) // разрешить изменение размера
 	ebiten.SetFullscreen(true)                                     // полноэкранный режим

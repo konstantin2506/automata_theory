@@ -8,6 +8,12 @@ import (
     intr "lab3/interpreter"
 )
 var __rootAST intr.AstNode = nil
+var __goodCount = 0
+
+func GetGood() int{
+    return __goodCount
+}
+
 func GetRoot() intr.AstNode{
     return __rootAST
 }
@@ -110,7 +116,7 @@ type paramStruct struct{
 %token <num> OCTAL;
 %token <num> DECIMAL;
 
-%type <node> statement statement_list variable_init_statement expr term factor basic_part_ar print_statement rotate_statement move_statement  if_statement for_statement variable_assign_statement function_decl_statement return_statement
+%type <node> statement statement_list statement_with_thank  variable_init_statement expr term factor basic_part_ar print_statement rotate_statement move_statement  if_statement for_statement variable_assign_statement function_decl_statement return_statement
 %type <dType> variable_type
 %type <nodeList> dimension arguments
 %type <params> params_names 
@@ -139,9 +145,28 @@ statement_list:
         statements.PushStatement($2)
         $$ = statements
     }
+|   statement_list statement_with_thank
+    {
+        statements := $1.(*intr.StatementListNode)
+        statements.PushStatement($2)
+        $$ = statements
+    }
 ;
+statement_with_thank:
+    statement THANK_YOU
+    {
+        __goodCount++
+        $$ = $1
+    }
+|   PLEASE statement
+    {
+        __goodCount++
+        $$ = $2
+    }
+
+
 statement:
-    variable_init_statement
+   variable_init_statement
     {
         $$ = $1 
     }
@@ -369,7 +394,8 @@ arguments:
     }
 ;
 expr:
-    expr EQ
+    
+   expr EQ
     {
         $$ = intr.NewEqReduceNode($1)
     }
@@ -400,7 +426,7 @@ expr:
 |   expr LTE_MAP 
     {
         $$ = intr.NewLteMapNode($1)
-    }
+    } 
 |   expr GT_MAP 
     {
         $$ = intr.NewGtMapNode($1)
@@ -455,6 +481,14 @@ factor:
     {
         $$ = intr.NewToIntegerCastNode($2)
     }
+|   SIZE_OPERATOR basic_part_ar
+    {
+        $$ = intr.NewSizeNode($2)
+    }
+|   MOST basic_part_ar
+    {
+        $$ = intr.NewMostNode($2)
+    }
 
 
 |   NOT basic_part_ar
@@ -490,6 +524,8 @@ basic_part_ar:
     {
         $$ = intr.NewFunctionCallNode($2, $4)
     }
+    
+
 |   SURROUNDINGS
     {
         $$ = intr.NewSurrNode()
@@ -509,7 +545,6 @@ basic_part_ar:
 
 %%
 
-// Функция вывода ошибок, требуемая для yyLexer
 func (l *lexerCtx) Error(s string) {
 	fmt.Fprintf(os.Stderr, "Ошибка: %s\n", s)
 }
