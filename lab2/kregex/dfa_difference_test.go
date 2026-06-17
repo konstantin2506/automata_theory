@@ -64,5 +64,5 @@ func TestDifferenceAA_E__EA_E__AE_A(t *testing.T) {
 				t.Errorf("DifferenceAE('%s', empty) not isomorphic to A", tt.name)
 			}
 		})
-	}
+	} // me(ph|f)i - mefi == mephi
 }

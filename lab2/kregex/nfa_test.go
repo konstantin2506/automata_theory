@@ -253,10 +253,10 @@ func TestNfa_Search(t *testing.T) {
 		},
 		{
 			name:       "woooow case",
-			regex:      "(<A>(<AA>a?|b?))",
-			str:        "cccaabbcc",
-			wantMatch:  "a",
-			wantGroups: map[string]string{"A": "a", "AA": "a"},
+			regex:      "(<A>(<AA>a?|b?)d)",
+			str:        "cccaabdbcc",
+			wantMatch:  "bd",
+			wantGroups: map[string]string{"A": "bd", "AA": "b"},
 		},
 		{
 			name:      "именованная группа — нет совпадения",

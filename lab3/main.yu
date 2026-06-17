@@ -1,0 +1,66 @@
+digit routing factorial(digit n){
+    check n - 1 eq then{
+        return 1;
+    }
+    return n * perform factorial(n - 2); thank you
+}
+
+digit routing withoutReturn(digit n){
+    print(n);
+}
+
+logic routing canGoI(digit p, logic surr[3][1][2]){
+    logic arr[2] = false;
+
+    print(size arr);
+    print(arr);
+    logic ok = most arr;
+    check ok then{
+        print(perform factorial(4));
+    }otherwise{
+        print(perform factorial(3));        
+    }
+    
+    digit arr_int[2][3] = 1;
+    digit arr_stop[2][3] = 2;
+    for arr_int stop arr_stop step arr_int{
+        print(54);
+    }
+
+    return !surr[p][1][1];
+}
+
+
+digit routing pathfinder(digit argc){
+    move 2;
+    digit i = 0;
+    digit j = 20000;
+    please digit k = 1;
+    digit n = 1;
+    for i stop j step k{
+        logic notPassed = true;
+        check (perform canGoI(3, surroundings)) then{
+            rotate 1;
+            move 1;
+            notPassed = false;
+        }
+        check notPassed && (perform canGoI(2, surroundings)) then{
+            move(1);
+            notPassed = false;
+        }
+        check notPassed && (perform canGoI(1, surroundings)) then{
+            rotate -1;
+            move 1;
+            notPassed = false;
+        }
+        check notPassed then{
+            rotate 3;
+        }
+
+        n = n + 1;
+
+    }
+        
+    return 0;
+}
+
